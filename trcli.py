@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import select, text
 from tractatus_agents import AgentAction, AgentRouter
+from tractatus_agents.llm import LLMAgent
 from tractatus_orm.database import SessionLocal, init_db
 from tractatus_orm.models import Proposition, Translation
 
@@ -22,7 +23,7 @@ class TractatusCLI(cmd.Cmd):
         init_db()
         self.session = SessionLocal()
         self.current: Proposition | None = None
-        self.agent_router = AgentRouter()
+        self.agent_router = self._configure_agent_router()
 
     def default(self, line: str):
         """Fallback for unknown input — interpret bare numbers as 'get <name>'."""
@@ -403,6 +404,27 @@ class TractatusCLI(cmd.Cmd):
         else:
             print(f"[LLM] {response.action}")
         print(response.content)
+
+    def _configure_agent_router(self) -> AgentRouter:
+        """Create an agent router with the preferred LLM backend."""
+
+        client = None
+        try:
+            from tractatus_agents.llm_openai import OpenAILLMClient
+        except ImportError:  # pragma: no cover - optional dependency
+            print(
+                "OpenAI backend unavailable (missing 'openai' package?). "
+                "Falling back to echo client.",
+            )
+        else:
+            try:
+                client = OpenAILLMClient()
+            except RuntimeError as exc:
+                print(f"{exc} Falling back to echo client.")
+            except Exception as exc:  # pragma: no cover - defensive guard
+                print(f"Unable to initialise OpenAI client: {exc}. Falling back to echo client.")
+
+        return AgentRouter(LLMAgent(client))
 
 
 if __name__ == "__main__":

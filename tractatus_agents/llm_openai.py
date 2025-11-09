@@ -1,24 +1,29 @@
-# llm_openai.py
+"""OpenAI-backed LLM client implementation."""
+from __future__ import annotations
+
 import os
+
 from openai import OpenAI
 
-class OpenAILLMClient:
-    """Concrete LLMClient that uses OpenAI's API."""
+from .llm import LLMClient
 
-    def __init__(self, model: str = "gpt-4o-mini"):
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
+
+class OpenAILLMClient(LLMClient):
+    """Concrete :class:`LLMClient` that talks to the OpenAI API."""
+
+    def __init__(self, model: str = "gpt-4o-mini") -> None:
+        key = os.getenv("OPENAI_API_KEY")
+        if not key:
             raise RuntimeError(
-                "Set the OPENAI_API_KEY environment variable "
-                "to use the OpenAI backend."
+                "Missing OPENAI_API_KEY. Export it before launching the CLI."
             )
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=key)
         self.model = model
 
     def complete(self, prompt: str, *, max_tokens: int | None = None) -> str:
-        resp = self.client.chat.completions.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=max_tokens or 500,
+            max_tokens=max_tokens or 600,
         )
-        return resp.choices[0].message.content.strip()
+        return response.choices[0].message.content.strip()
