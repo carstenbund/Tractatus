@@ -130,6 +130,30 @@ for child in root.children:
     print(child.name, child.text)
 ```
 
+### Command-line Interface and LLM helpers
+
+The project ships with an interactive CLI that wraps the ORM session and
+provides helper commands for navigating the hierarchy or handing content to
+an LLM-backed assistant.
+
+```bash
+python trcli.py
+```
+
+Key commands once the prompt `(tractatus)` is displayed:
+
+| Command | Description |
+| ------- | ----------- |
+| `get <name>` | Jump directly to a proposition by its dotted identifier (`get 1.2.3`). Use `get id:<n>` to target the numeric database identifier. |
+| `list [name]` | Show the immediate children of the current proposition or of the supplied target (`list 2`). |
+| `tree` | Print the full subtree for the current proposition. |
+| `ag` / `agent` | Send the current or selected propositions to the LLM router. Examples: `ag comment` (comment on the current node), `ag 2 list comparison` (summarise the children of proposition `2` and compare them). |
+
+You can also combine navigation and LLM calls inline with prefixes such as
+`1.1 ag:comment` to jump to `1.1` and immediately request an LLM comment.
+If no OpenAI credentials are configured the CLI falls back to an echo agent,
+so the command structure can be explored without an external dependency.
+
 ---
 
 ## **7. Design Philosophy**
