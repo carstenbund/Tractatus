@@ -108,9 +108,15 @@ Each record receives a stable **numeric ID** that serves as an anchor for:
 ### Build and Explore
 
 ```bash
-python ingest.py        # builds the tractatus.db hierarchy
+python ingest.py        # builds the tractatus.db hierarchy from tractatus-raw.txt
 python main.py          # prints the structure from root down
 ```
+
+The ingestion process currently uses the German text embedded in
+`tractatus-raw.txt`. The raw source contains the complete bilingual edition,
+but only the German portion preserves consistent proposition numbering. The
+`tractatus_orm.text_cleaner` module exposes helpers for extracting these entries
+from the raw file.
 
 ### Interactive Exploration
 
