@@ -46,6 +46,7 @@ def ingest_text(file_path: str | Path, language: str = "german") -> int:
 
 def main() -> None:
     raw_path = Path(__file__).resolve().parents[1] / "tractatus-raw.txt"
+    print(raw_path)
     count = ingest_text(raw_path)
     print(f"Ingested {count} propositions from {raw_path.name}.")
 
