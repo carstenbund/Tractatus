@@ -24,35 +24,49 @@ class TractatusCLI(cmd.Cmd):
         self.session = SessionLocal()
         self.current: Proposition | None = None
         self.agent_router = self._configure_agent_router()
-
+            
     def default(self, line: str):
-        """Fallback for unknown input — interpret bare numbers as 'get <name>'."""
+        """Fallback for unknown input — interpret bare numbers or ag: forms."""
+    
         text = line.strip()
         if not text:
             return  # ignore empty lines
-
+    
+        # --- 1. handle explicit agent prefix "ag:<target>" ---
         if text.startswith("ag:"):
-            return self.do_agent(text.removeprefix("ag:").strip())
-
-        if " ag:" in text:
-            head, tail = text.split(" ag:", 1)
+            # only split on first colon so we don't destroy valid range "1:2"
+            _, remainder = text.split(":", 1)
+            return self.do_agent(remainder.strip())
+    
+        # --- 2. handle inline agent "X ag[:<action>]" or "X ag:<action>" ---
+        # e.g. "1 ag" or "1 ag:compare" or "1 ag:comment"
+        if " ag" in text:
+            head, tail = text.split(" ag", 1)
             head = head.strip()
-            tail = tail.strip()
+            tail = tail.lstrip(":").strip()  # remove optional colon
+            # Execute the first part if it looks like a navigation
             if head:
                 stop = self.onecmd(head)
                 if stop:
                     return stop
-            agent_arg = f"{head} {tail}".strip()
-            return self.do_agent(agent_arg)
-
-        # If user typed something like 1, 1.1, 5.2, etc.
-        if text[0].isdigit() or text.startswith("id:") or text.startswith("name:"):
-            # Redirect to the get command
+            if tail:
+                # tail could be just an action, e.g. "compare"
+                return self.do_agent(f"{head} {tail}".strip())
+            else:
+                # no explicit mode → default to comment
+                return self.do_agent(head.strip())
+    
+        # --- 3. support compact range queries like "1-2" or "1:2" ---
+        if re.match(r"^\d+(\.\d+)*\s*[-:]\s*\d+(\.\d+)*$", text):
             return self.do_get(text)
-
-        # Otherwise, unknown command
+    
+        # --- 4. treat bare number-like input as 'get' ---
+        if text[0].isdigit() or text.startswith("id:") or text.startswith("name:"):
+            return self.do_get(text)
+    
+        # --- 5. nothing matched ---
         print(f"Unknown syntax: {line}")
-        
+       
 
     def do_get(self, arg):
         """get <value> — jump by name (default) or id:<n> if explicit"""
