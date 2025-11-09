@@ -1,10 +1,7 @@
 # Tractatus
 
 
-Here’s a clean and self-contained **project introduction** that you can include at the top of your repository or pass to another developer or AI agent.
-It explains the *concept*, *design*, and *current architecture* clearly, and positions the ORM implementation in context.
 
----
 
 # **Tractatus ORM Project – Concept and Architecture Overview**
 
