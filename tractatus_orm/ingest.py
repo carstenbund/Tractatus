@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 from .database import SessionLocal, init_db
 from .models import Proposition
+from .text_cleaner import extract_raw_propositions
 
 
-LINE_RE = re.compile(r"^(\d+(?:\.\d+)*)\s+(.*)")
-
-
-def ingest_text(file_path: str | Path) -> int:
+def ingest_text(file_path: str | Path, language: str = "german") -> int:
     init_db()
     session = SessionLocal()
     lookup: dict[str, Proposition] = {}
@@ -19,24 +16,18 @@ def ingest_text(file_path: str | Path) -> int:
     if not file_path.exists():
         raise FileNotFoundError(file_path)
 
-    with file_path.open(encoding="utf-8") as handle:
-        for idx, raw_line in enumerate(handle):
-            line = raw_line.strip()
-            if not line:
-                continue
-            match = LINE_RE.match(line)
-            if not match:
-                continue
-            name, text = match.groups()
-            level = name.count(".") + 1
-            proposition = Proposition(
-                name=name,
-                text=text,
-                level=level,
-                sort_order=idx,
-            )
-            lookup[name] = proposition
-            session.add(proposition)
+    entries = extract_raw_propositions(file_path, language=language)
+
+    for idx, entry in enumerate(entries):
+        level = entry.name.count(".") + 1
+        proposition = Proposition(
+            name=entry.name,
+            text=entry.text,
+            level=level,
+            sort_order=idx,
+        )
+        lookup[entry.name] = proposition
+        session.add(proposition)
 
     session.flush()
 
@@ -54,8 +45,9 @@ def ingest_text(file_path: str | Path) -> int:
 
 
 def main() -> None:
-    count = ingest_text(Path(__file__).resolve().parent / "tractatus.txt")
-    print(f"Ingested {count} propositions.")
+    raw_path = Path(__file__).resolve().parents[1] / "tractatus-raw.txt"
+    count = ingest_text(raw_path)
+    print(f"Ingested {count} propositions from {raw_path.name}.")
 
 
 if __name__ == "__main__":
