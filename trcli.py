@@ -33,27 +33,47 @@ class TractatusCLI(cmd.Cmd):
             return  # ignore empty lines
     
         if text.startswith("ag:"):
-            # handle "ag:1" or "ag:1-2" or "ag:1:2" etc.
+            # handle "ag:1" or "ag:comment 1" and reorder if the action leads.
             remainder = text[3:].strip()  # directly slice after "ag:"
             if not remainder:
-                print("Usage: ag:<target> [action]")
+                print("Usage: ag:<target> [action] or ag:<action> [targets]")
                 return
-            return self.do_agent(remainder)
+            try:
+                tokens = shlex.split(remainder)
+            except ValueError as exc:
+                print(f"Invalid agent syntax: {exc}")
+                return
+            if not tokens:
+                print("Usage: ag:<target> [action] or ag:<action> [targets]")
+                return
+            normalised = self._normalise_leading_agent_tokens(tokens)
+            return self.do_agent(normalised)
 
         # --- 2. handle inline agent "X ag[:<action>]" or "X ag:<action>" ---
         # e.g. "1 ag" or "1 ag:compare" or "1 ag:comment"
         if " ag" in text:
             head, tail = text.split(" ag", 1)
             head = head.strip()
-            tail = tail.lstrip(":").strip()  # remove optional colon
+            tail = tail.strip()
+            colon_prefixed = tail.startswith(":")
+            tail_body = tail.lstrip(":").strip()
             # Execute the first part if it looks like a navigation
             if head:
                 stop = self.onecmd(head)
                 if stop:
                     return stop
-            if tail:
-                # tail could be just an action, e.g. "compare"
-                return self.do_agent(f"{head} {tail}".strip())
+            if tail_body:
+                try:
+                    tail_tokens = shlex.split(tail_body)
+                except ValueError as exc:
+                    print(f"Invalid agent syntax: {exc}")
+                    return
+                if colon_prefixed:
+                    tail_payload = self._normalise_leading_agent_tokens(tail_tokens)
+                else:
+                    tail_payload = shlex.join(tail_tokens)
+                command = " ".join(part for part in (head, tail_payload) if part)
+                return self.do_agent(command)
             else:
                 # no explicit mode → default to comment
                 return self.do_agent(head.strip())
@@ -226,8 +246,19 @@ class TractatusCLI(cmd.Cmd):
         arg = arg.strip()
         tokens = shlex.split(arg)
 
+        action_override: AgentAction | None = None
+        if tokens and tokens[0].startswith(":"):
+            leading = tokens.pop(0)[1:].strip()
+            if not leading:
+                print("Usage: ag:<target> [action] or ag:<action> <targets>")
+                return
+            try:
+                action_override = AgentAction.from_cli_token(leading)
+            except ValueError:
+                tokens.insert(0, leading)
+
         if not tokens:
-            return self._agent_on_current(AgentAction.COMMENT)
+            return self._agent_on_current(action_override or AgentAction.COMMENT)
 
         command_map = {
             "get": self._agent_payload_for_targets,
@@ -239,9 +270,12 @@ class TractatusCLI(cmd.Cmd):
         command_key = first_token.lower()
 
         try:
-            if command_key in command_map:
+            if command_key in command_map and action_override is None:
                 action, remaining = self._split_action_token(tokens[1:])
                 payload_info = command_map[command_key](remaining)
+            elif action_override is not None:
+                action = action_override
+                payload_info = self._agent_payload_for_targets(tokens)
             else:
                 action, target_tokens = self._split_action_token(tokens)
                 if not target_tokens:
@@ -269,6 +303,20 @@ class TractatusCLI(cmd.Cmd):
         except ValueError:
             return AgentAction.COMMENT, tokens
         return action, tokens[:-1]
+
+    @staticmethod
+    def _normalise_leading_agent_tokens(tokens: list[str]) -> str:
+        """Reorder tokens when an agent action is supplied before its targets."""
+
+        if not tokens:
+            return ""
+        try:
+            AgentAction.from_cli_token(tokens[0])
+        except ValueError:
+            return shlex.join(tokens)
+        if len(tokens) == 1:
+            return shlex.join(tokens)
+        return shlex.join(tokens[1:] + [tokens[0]])
 
     def _agent_on_current(self, action: AgentAction) -> None:
         if not self.current:
