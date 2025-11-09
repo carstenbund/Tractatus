@@ -32,12 +32,14 @@ class TractatusCLI(cmd.Cmd):
         if not text:
             return  # ignore empty lines
     
-        # --- 1. handle explicit agent prefix "ag:<target>" ---
         if text.startswith("ag:"):
-            # only split on first colon so we don't destroy valid range "1:2"
-            _, remainder = text.split(":", 1)
-            return self.do_agent(remainder.strip())
-    
+            # handle "ag:1" or "ag:1-2" or "ag:1:2" etc.
+            remainder = text[3:].strip()  # directly slice after "ag:"
+            if not remainder:
+                print("Usage: ag:<target> [action]")
+                return
+            return self.do_agent(remainder)
+
         # --- 2. handle inline agent "X ag[:<action>]" or "X ag:<action>" ---
         # e.g. "1 ag" or "1 ag:compare" or "1 ag:comment"
         if " ag" in text:
