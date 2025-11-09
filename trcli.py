@@ -1,5 +1,6 @@
 import cmd
 import re
+import shlex
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -31,6 +32,17 @@ class TractatusCLI(cmd.Cmd):
 
         if text.startswith("ag:"):
             return self.do_agent(text.removeprefix("ag:").strip())
+
+        if " ag:" in text:
+            head, tail = text.split(" ag:", 1)
+            head = head.strip()
+            tail = tail.strip()
+            if head:
+                stop = self.onecmd(head)
+                if stop:
+                    return stop
+            agent_arg = f"{head} {tail}".strip()
+            return self.do_agent(agent_arg)
 
         # If user typed something like 1, 1.1, 5.2, etc.
         if text[0].isdigit() or text.startswith("id:") or text.startswith("name:"):
@@ -101,6 +113,30 @@ class TractatusCLI(cmd.Cmd):
         for child in self.current.children:
             print(f"{child.id:>4}  {child.name}: {child.text[:60]}")
 
+    def do_list(self, arg):
+        """list [name] — list children for the target or current node."""
+
+        target = arg.strip()
+        if target:
+            node = self.session.scalars(
+                select(Proposition).where(Proposition.name == target)
+            ).first()
+            if not node:
+                print(f"No proposition found for '{target}'.")
+                return
+            self.current = node
+        elif not self.current:
+            print("No current node.")
+            return
+
+        node = self.current
+        children = sorted(node.children, key=lambda child: self._sort_key(child.name))
+        if not children:
+            print("No children.")
+            return
+        for child in children:
+            print(f"{child.id:>4}  {child.name}: {child.text[:60]}")
+
     def do_tree(self, arg):
         """Recursively print subtree"""
         if not self.current:
@@ -162,84 +198,210 @@ class TractatusCLI(cmd.Cmd):
         return True
 
     # --- agent integrations ---
+    def do_ag(self, arg: str):
+        """ag [target] [mode] — convenience wrapper for agent invocation."""
+
+        return self.do_agent(arg)
+
     def do_agent(self, arg: str):
-        """ag:<target>[:<end>] [Comment|Comparison|Websearch|Reference]"""
+        """Hybrid agent command supporting prefixes and inline usage."""
 
-        tokens = arg.split()
+        arg = arg.strip()
+        tokens = shlex.split(arg)
+
         if not tokens:
-            print("Usage: ag:<target>[:end] [Comment|Comparison|Websearch|Reference]")
-            return
+            return self._agent_on_current(AgentAction.COMMENT)
+
+        command_map = {
+            "get": self._agent_payload_for_targets,
+            "list": self._agent_payload_for_list,
+            "tree": self._agent_payload_for_tree,
+        }
+
+        first_token = tokens[0]
+        command_key = first_token.lower()
 
         try:
-            start, end = self._parse_agent_range(tokens[0])
+            if command_key in command_map:
+                action, remaining = self._split_action_token(tokens[1:])
+                payload_info = command_map[command_key](remaining)
+            else:
+                action, target_tokens = self._split_action_token(tokens)
+                if not target_tokens:
+                    return self._agent_on_current(action)
+                payload_info = self._agent_payload_for_targets(target_tokens)
         except ValueError as exc:
             print(exc)
             return
 
-        action_token = tokens[1] if len(tokens) > 1 else None
-        try:
-            action = AgentAction.from_cli_token(action_token)
-        except ValueError as exc:
-            print(exc)
+        if not payload_info:
             return
 
-        propositions = self._resolve_agent_targets(start, end)
-        if not propositions:
-            target = f"{start}:{end}" if end else start
-            print(f"No propositions found for {target}.")
-            return
-
-        response = self.agent_router.perform(action, propositions)
-        self._display_agent_response(response, propositions)
+        propositions, payload, scope = payload_info
+        response = self.agent_router.perform(action, propositions, payload=payload)
+        self._display_agent_response(response, scope)
 
     @staticmethod
-    def _parse_agent_range(token: str) -> tuple[str, str | None]:
+    def _split_action_token(tokens: list[str]) -> tuple[AgentAction, list[str]]:
+        if not tokens:
+            return AgentAction.COMMENT, tokens
+
+        candidate = tokens[-1]
+        try:
+            action = AgentAction.from_cli_token(candidate)
+        except ValueError:
+            return AgentAction.COMMENT, tokens
+        return action, tokens[:-1]
+
+    def _agent_on_current(self, action: AgentAction) -> None:
+        if not self.current:
+            print("No current node.")
+            return
+        propositions = [self.current]
+        response = self.agent_router.perform(action, propositions)
+        scope = self._format_proposition_scope(propositions)
+        self._display_agent_response(response, scope)
+
+    def _agent_payload_for_targets(
+        self, tokens: Iterable[str]
+    ) -> tuple[list[Proposition], str | None, str] | None:
+        tokens = [token.strip() for token in tokens if token.strip()]
+        if not tokens:
+            if not self.current:
+                print("No proposition target supplied and no current node.")
+                return None
+            propositions = [self.current]
+        else:
+            propositions = self._resolve_agent_tokens(tokens)
+        if not propositions:
+            joined = " ".join(tokens) if tokens else "<current>"
+            print(f"No propositions found for {joined}.")
+            return None
+        scope = self._format_proposition_scope(propositions)
+        return propositions, None, scope
+
+    def _agent_payload_for_list(
+        self, tokens: Iterable[str]
+    ) -> tuple[list[Proposition], str | None, str] | None:
+        token_list = [token.strip() for token in tokens if token.strip()]
+        if token_list:
+            targets = self._resolve_agent_tokens([token_list[0]])
+            if not targets:
+                print(f"No propositions found for {token_list[0]}.")
+                return None
+            node = targets[0]
+        else:
+            if not self.current:
+                print("No current node.")
+                return None
+            node = self.current
+        self.current = node
+        children = sorted(node.children, key=lambda child: self._sort_key(child.name))
+        if not children:
+            print(f"No children found for {node.name}.")
+            return None
+        payload = "\n\n".join(f"{child.name}: {child.text}" for child in children)
+        scope = f"children of {node.name}"
+        return list(children), payload, scope
+
+    def _agent_payload_for_tree(
+        self, tokens: Iterable[str]
+    ) -> tuple[list[Proposition], str | None, str] | None:
+        token_list = [token.strip() for token in tokens if token.strip()]
+        if token_list:
+            targets = self._resolve_agent_tokens([token_list[0]])
+            if not targets:
+                print(f"No propositions found for {token_list[0]}.")
+                return None
+            node = targets[0]
+        else:
+            if not self.current:
+                print("No current node.")
+                return None
+            node = self.current
+        self.current = node
+        payload = self._render_tree(node)
+        scope = f"tree of {node.name}"
+        return [node], payload, scope
+
+    def _resolve_agent_tokens(self, tokens: Iterable[str]) -> list[Proposition]:
+        collected: dict[int, Proposition] = {}
+        for token in tokens:
+            try:
+                matches = self._resolve_agent_token(token)
+            except ValueError as exc:
+                print(exc)
+                return []
+            for proposition in matches:
+                collected[proposition.id] = proposition
+        ordered = sorted(collected.values(), key=lambda prop: self._sort_key(prop.name))
+        if ordered:
+            self.current = ordered[0]
+        return ordered
+
+    def _resolve_agent_token(self, token: str) -> list[Proposition]:
         token = token.strip()
         if not token:
-            raise ValueError("Missing proposition target for agent command.")
-
-        if ":" not in token:
-            return token, None
-
-        start, end = token.split(":", 1)
-        start = start.strip()
-        end = end.strip()
-        if not start or not end:
-            raise ValueError("Invalid range syntax. Use ag:<start>:<end> <Action>.")
-        return start, end
-
-    def _resolve_agent_targets(self, start: str, end: str | None) -> list[Proposition]:
+            return []
+        if token.startswith("id:"):
+            try:
+                identifier = int(token.removeprefix("id:"))
+            except ValueError:
+                raise ValueError("Invalid id syntax. Use id:<integer>.") from None
+            proposition = self.session.get(Proposition, identifier)
+            return [proposition] if proposition else []
+        start, end = self._parse_agent_range(token)
         if end:
             stmt = (
                 select(Proposition)
                 .where(Proposition.name >= start, Proposition.name <= end)
                 .order_by(Proposition.name)
             )
-            result = list(self.session.scalars(stmt))
-        else:
-            stmt = select(Proposition).where(Proposition.name == start)
-            result = list(self.session.scalars(stmt))
-
-        if result:
-            self.current = result[0]
-        return result
+            return list(self.session.scalars(stmt))
+        stmt = select(Proposition).where(Proposition.name == start)
+        return list(self.session.scalars(stmt))
 
     @staticmethod
-    def _format_proposition_scope(propositions: Iterable[Proposition]) -> str:
+    def _parse_agent_range(token: str) -> tuple[str, str | None]:
+        token = token.strip()
+        if not token:
+            raise ValueError("Missing proposition target for agent command.")
+        for separator in (":", "-"):
+            if separator in token:
+                start, end = token.split(separator, 1)
+                start = start.strip()
+                end = end.strip()
+                if not start or not end:
+                    raise ValueError("Invalid range syntax. Use <start>-<end> or <start>:<end>.")
+                return start, end
+        return token, None
+
+    @staticmethod
+    def _render_tree(node: Proposition) -> str:
+        lines: list[str] = []
+
+        def walk(current: Proposition, depth: int = 0) -> None:
+            lines.append("  " * depth + f"{current.name}: {current.text}")
+            for child in sorted(current.children, key=lambda ch: TractatusCLI._sort_key(ch.name)):
+                walk(child, depth + 1)
+
+        walk(node)
+        return "\n".join(lines)
+
+    @staticmethod
+    def _sort_key(name: str) -> list[int | str]:
+        return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)]
+
+    def _format_proposition_scope(self, propositions: Iterable[Proposition]) -> str:
         names = {p.name for p in propositions}
-        ordered = ", ".join(
-            sorted(
-                names,
-                key=lambda name: [
-                    int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)
-                ],
-            )
-        )
+        ordered = ", ".join(sorted(names, key=self._sort_key))
         return ordered
 
-    def _display_agent_response(self, response: "LLMResponse", propositions: Iterable[Proposition]) -> None:
-        scope = self._format_proposition_scope(propositions)
-        print(f"[LLM] {response.action} for {scope}")
+    def _display_agent_response(self, response: "LLMResponse", scope: str | None = None) -> None:
+        if scope:
+            print(f"[LLM] {response.action} for {scope}")
+        else:
+            print(f"[LLM] {response.action}")
         print(response.content)
 
 

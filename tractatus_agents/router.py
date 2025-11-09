@@ -44,10 +44,19 @@ class AgentRouter:
     def __init__(self, llm_agent: LLMAgent | None = None) -> None:
         self._llm_agent = llm_agent or LLMAgent()
 
-    def perform(self, action: AgentAction, propositions: Iterable[PropositionLike]) -> LLMResponse:
-        """Execute an agent action for the supplied propositions."""
+    def perform(
+        self,
+        action: AgentAction,
+        propositions: Iterable[PropositionLike] | None,
+        *,
+        payload: str | None = None,
+    ) -> LLMResponse:
+        """Execute an agent action for the supplied propositions or payload."""
 
-        payload = self._build_payload(propositions)
+        if payload is None:
+            if propositions is None:
+                raise ValueError("Either propositions or payload must be provided.")
+            payload = self._build_payload(propositions)
 
         if action is AgentAction.COMMENT:
             return self._llm_agent.comment(payload)
