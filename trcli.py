@@ -145,6 +145,41 @@ class TractatusCLI(cmd.Cmd):
         print(parent)
         self.current = parent
 
+    def do_next(self, arg):
+        """next (or 'n') — go to the next proposition by id"""
+        self._navigate_adjacent(1)
+
+    def do_n(self, arg):
+        """Shorthand for 'next'"""
+        return self.do_next(arg)
+
+    def do_previous(self, arg):
+        """previous (or 'p') — go to the previous proposition by id"""
+        self._navigate_adjacent(-1)
+
+    def do_p(self, arg):
+        """Shorthand for 'previous'"""
+        return self.do_previous(arg)
+
+    def _navigate_adjacent(self, offset: int) -> None:
+        """Navigate to adjacent proposition (offset: +1 for next, -1 for previous)"""
+        if not self.current:
+            print("No current node.")
+            return
+
+        next_id = self.current.id + offset
+        next_prop = self.session.get(Proposition, next_id)
+        if not next_prop:
+            if offset > 0:
+                print("No next proposition.")
+            else:
+                print("No previous proposition.")
+            return
+
+        self.current = next_prop
+        display_length = self.config.get("display_length")
+        print(f"{next_prop.name}: {next_prop.text[:display_length]}")
+
     def do_children(self, arg):
         """List children"""
         if not self.current:
