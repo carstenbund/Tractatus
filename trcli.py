@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import select, text
 from tractatus_agents import AgentAction, AgentRouter
 from tractatus_agents.llm import LLMAgent
+from tractatus_config import TrcliConfig
 from tractatus_orm.database import SessionLocal, init_db
 from tractatus_orm.models import Proposition, Translation
 
@@ -23,6 +24,7 @@ class TractatusCLI(cmd.Cmd):
         init_db()
         self.session = SessionLocal()
         self.current: Proposition | None = None
+        self.config = TrcliConfig()
         self.agent_router = self._configure_agent_router()
             
     def default(self, line: str):
@@ -116,10 +118,11 @@ class TractatusCLI(cmd.Cmd):
         name_hit = self.session.scalars(
             select(Proposition).where(Proposition.name == key)
         ).first()
-        
+
         if name_hit:
             self.current = name_hit
-            print(f"{name_hit.name}: {name_hit.text}")
+            display_length = self.config.get("display_length")
+            print(f"{name_hit.name}: {name_hit.text[:display_length]}")
             return
         
         # fallback: id lookup only if name not found
@@ -147,8 +150,9 @@ class TractatusCLI(cmd.Cmd):
         if not self.current:
             print("No current node.")
             return
+        display_length = self.config.get("display_length")
         for child in self.current.children:
-            print(f"{child.id:>4}  {child.name}: {child.text[:60]}")
+            print(f"{child.id:>4}  {child.name}: {child.text[:display_length]}")
 
     def do_list(self, arg):
         """list [name] — list children for the target or current node."""
@@ -171,8 +175,9 @@ class TractatusCLI(cmd.Cmd):
         if not children:
             print("No children.")
             return
+        display_length = self.config.get("display_length")
         for child in children:
-            print(f"{child.id:>4}  {child.name}: {child.text[:60]}")
+            print(f"{child.id:>4}  {child.name}: {child.text[:display_length]}")
 
     def do_tree(self, arg):
         """Recursively print subtree"""
@@ -215,13 +220,86 @@ class TractatusCLI(cmd.Cmd):
         else:
             print("No translation found.")
 
+    # --- preferences ---
+    def do_set(self, arg):
+        """set <key> <value> — set a user preference"""
+        parts = arg.strip().split(None, 1)
+        if len(parts) != 2:
+            print("Usage: set <key> <value>")
+            print("Available preferences:")
+            for key, value in self.config.DEFAULT_PREFERENCES.items():
+                print(f"  {key} = {value}")
+            return
+
+        key, value_str = parts
+        # Try to parse the value as appropriate type
+        try:
+            # Get the expected type from defaults
+            default_value = self.config.DEFAULT_PREFERENCES.get(key)
+            if default_value is None:
+                print(f"Unknown preference: {key}")
+                return
+
+            expected_type = type(default_value)
+            if expected_type == int:
+                value = int(value_str)
+            elif expected_type == bool:
+                value = value_str.lower() in ("true", "1", "yes", "on")
+            else:
+                value = value_str
+
+            # Validate the preference
+            is_valid, error_msg = self.config.validate_preference(key, value)
+            if not is_valid:
+                print(f"Error: {error_msg}")
+                return
+
+            # Set it
+            self.config.set(key, value)
+            print(f"Set {key} = {value}")
+        except ValueError as e:
+            print(f"Error: Invalid value for {key}: {e}")
+
+    def do_config(self, arg):
+        """config [list|reset] — view or manage preferences"""
+        action = arg.strip().lower()
+
+        if action == "reset":
+            self.config.reset()
+            print("All preferences reset to defaults.")
+            return
+
+        if action == "reset-all":
+            self.config.reset()
+            print("All preferences reset to defaults.")
+            return
+
+        if action and action not in ("list", ""):
+            # Try to reset a specific preference
+            if action.startswith("reset "):
+                key = action[6:].strip()
+                if self.config.reset(key):
+                    print(f"Reset {key} to default value.")
+                else:
+                    print(f"Unknown preference: {key}")
+                return
+            print(f"Unknown action: {action}")
+            return
+
+        # List all preferences
+        print("Current preferences (.trclirc):")
+        prefs = self.config.list_preferences()
+        for key, value in sorted(prefs.items()):
+            print(f"  {key} = {value}")
+
     # --- utility commands ---
     def do_search(self, arg):
         """search <term> — find propositions containing term"""
         term = f"%{arg.strip()}%"
         stmt = select(Proposition).where(Proposition.text.ilike(term))
+        display_length = self.config.get("display_length")
         for p in self.session.scalars(stmt):
-            print(f"{p.name}: {p.text[:60]}")
+            print(f"{p.name}: {p.text[:display_length]}")
 
     def do_sql(self, arg):
         """sql <query> — execute raw SQL"""
