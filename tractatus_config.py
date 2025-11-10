@@ -12,6 +12,7 @@ class TrcliConfig:
         "display_length": 60,  # Characters to display for text snippets
         "lines_per_output": 10,  # Max lines to display for list/tree output
         "lang": "en",  # Default language for translations
+        "llm_max_tokens": 500,  # Max tokens for LLM responses
     }
 
     def __init__(self, config_file: str | Path | None = None):
@@ -86,6 +87,9 @@ class TrcliConfig:
         elif key == "lines_per_output":
             if not (1 <= value <= 1000):
                 return False, "lines_per_output must be between 1 and 1000"
+        elif key == "llm_max_tokens":
+            if not (10 <= value <= 4000):
+                return False, "llm_max_tokens must be between 10 and 4000"
 
         return True, ""
 

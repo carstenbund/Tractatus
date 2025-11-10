@@ -566,7 +566,9 @@ class TractatusCLI(cmd.Cmd):
             except Exception as exc:  # pragma: no cover - defensive guard
                 print(f"Unable to initialise OpenAI client: {exc}. Falling back to echo client.")
 
-        return AgentRouter(LLMAgent(client))
+        # Get max_tokens from config
+        max_tokens = self.config.get("llm_max_tokens")
+        return AgentRouter(LLMAgent(client, max_tokens=max_tokens))
 
 
 if __name__ == "__main__":
