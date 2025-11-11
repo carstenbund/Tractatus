@@ -4,12 +4,31 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from .prompts import build_prompt_pair
+
 
 class LLMClient(Protocol):
     """Minimal protocol that any concrete LLM backend must implement."""
 
-    def complete(self, prompt: str, *, max_tokens: int | None = None) -> str:  # pragma: no cover - protocol definition
-        """Return the generated text for the supplied prompt."""
+    def complete(
+        self,
+        prompt: str | None = None,
+        *,
+        system: str | None = None,
+        user: str | None = None,
+        max_tokens: int | None = None,
+    ) -> str:  # pragma: no cover - protocol definition
+        """
+        Return the generated text for the supplied prompt(s).
+
+        Args:
+            prompt: Legacy single-string prompt (for backward compatibility)
+            system: System prompt providing context and instructions
+            user: User prompt with the specific request
+            max_tokens: Maximum tokens in the response
+
+        Either 'prompt' or both 'system'/'user' must be provided.
+        """
 
 
 @dataclass(slots=True)
@@ -24,12 +43,29 @@ class LLMResponse:
 class EchoLLMClient:
     """Fallback client that echoes the prompt when no backend is configured."""
 
-    def complete(self, prompt: str, *, max_tokens: int | None = None) -> str:  # noqa: D401 - short delegation
+    def complete(
+        self,
+        prompt: str | None = None,
+        *,
+        system: str | None = None,
+        user: str | None = None,
+        max_tokens: int | None = None,
+    ) -> str:  # noqa: D401 - short delegation
+        # Build display of what was sent
+        if system or user:
+            prompt_display = ""
+            if system:
+                prompt_display += f"System:\n{system}\n\n"
+            if user:
+                prompt_display += f"User:\n{user}"
+        else:
+            prompt_display = prompt or ""
+
         return (
             "[Placeholder LLM]\n"
             "No LLM backend is configured. Provide OPENAI_API_KEY or inject a custom "
             "LLM client.\n\nPrompt received:\n"
-            f"{prompt}"
+            f"{prompt_display}"
         )
 
 
@@ -41,37 +77,28 @@ class LLMAgent:
         self._max_tokens = max_tokens
 
     def comment(self, payload: str) -> LLMResponse:
-        prompt = self._format_prompt(
-            "Provide a reflective commentary on the following Tractatus propositions.",
-            payload,
-        )
-        return self._ask("Comment", prompt)
+        prompt_pair = build_prompt_pair("comment", payload)
+        return self._ask("Comment", prompt_pair)
 
     def compare(self, payload: str) -> LLMResponse:
-        prompt = self._format_prompt(
-            "Compare the following Tractatus propositions, focusing on interpretive contrasts and logical flow.",
-            payload,
-        )
-        return self._ask("Comparison", prompt)
+        prompt_pair = build_prompt_pair("comparison", payload)
+        return self._ask("Comparison", prompt_pair)
 
     def websearch(self, payload: str) -> LLMResponse:
-        prompt = self._format_prompt(
-            "Suggest web-search queries and summarize potential online resources that contextualize these propositions.",
-            payload,
-        )
-        return self._ask("Websearch", prompt)
+        prompt_pair = build_prompt_pair("websearch", payload)
+        return self._ask("Websearch", prompt_pair)
 
     def reference(self, payload: str) -> LLMResponse:
-        prompt = self._format_prompt(
-            "List relevant philosophical references or academic sources that expand on these propositions.",
-            payload,
+        prompt_pair = build_prompt_pair("reference", payload)
+        return self._ask("Reference", prompt_pair)
+
+    def _ask(self, action: str, prompt_pair: dict[str, str]) -> LLMResponse:
+        """Ask the LLM using system + user prompt pair."""
+        content = self._client.complete(
+            system=prompt_pair["system"],
+            user=prompt_pair["user"],
+            max_tokens=self._max_tokens,
         )
-        return self._ask("Reference", prompt)
-
-    def _ask(self, action: str, prompt: str) -> LLMResponse:
-        content = self._client.complete(prompt, max_tokens=self._max_tokens)
-        return LLMResponse(action=action, content=content, prompt=prompt)
-
-    @staticmethod
-    def _format_prompt(instruction: str, payload: str) -> str:
-        return f"{instruction}\n\n{payload}".strip()
+        # For response logging, concatenate system and user
+        full_prompt = f"{prompt_pair['system']}\n\n{prompt_pair['user']}"
+        return LLMResponse(action=action, content=content, prompt=full_prompt)
