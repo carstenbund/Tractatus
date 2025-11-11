@@ -20,10 +20,31 @@ class OpenAILLMClient(LLMClient):
         self.client = OpenAI(api_key=key)
         self.model = model
 
-    def complete(self, prompt: str, *, max_tokens: int | None = None) -> str:
+    def complete(
+        self,
+        prompt: str | None = None,
+        *,
+        system: str | None = None,
+        user: str | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        """Generate completion using OpenAI API with optional system prompt."""
+        messages = []
+
+        # Support both legacy single-prompt and new system+user format
+        if system or user:
+            if system:
+                messages.append({"role": "system", "content": system})
+            if user:
+                messages.append({"role": "user", "content": user})
+        elif prompt:
+            messages.append({"role": "user", "content": prompt})
+        else:
+            raise ValueError("Either 'prompt' or both 'system'/'user' must be provided.")
+
         response = self.client.chat.completions.create(
             model=self.model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             max_tokens=max_tokens or 600,
         )
         return response.choices[0].message.content.strip()
