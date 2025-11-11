@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tractatus - Interactive Web Interface</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Tractatus Logico-Philosophicus</h1>
+            <p class="subtitle">Interactive Web Navigator</p>
+        </header>
+
+        <main>
+            <!-- Command Input -->
+            <section class="command-section">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="commandInput"
+                        placeholder="Enter command: get 1, list, next, search term, ag comment, etc."
+                        autocomplete="off"
+                    />
+                    <button id="commandBtn" class="btn btn-primary">Execute</button>
+                </div>
+                <div class="quick-buttons">
+                    <button class="btn-quick" onclick="executeCommand('get 1')">Home</button>
+                    <button class="btn-quick" onclick="executeCommand('list')">List</button>
+                    <button class="btn-quick" onclick="executeCommand('next')">Next</button>
+                    <button class="btn-quick" onclick="executeCommand('previous')">Prev</button>
+                    <button class="btn-quick" onclick="executeCommand('parent')">Parent</button>
+                </div>
+            </section>
+
+            <!-- Current Proposition -->
+            <section class="proposition-section">
+                <h2 id="currentName" class="prop-name">No proposition loaded</h2>
+                <div id="currentText" class="prop-text">Use "get 1" to start</div>
+                <div class="prop-meta">
+                    <span id="propId"></span>
+                    <span id="propLevel"></span>
+                </div>
+            </section>
+
+            <!-- Tabs for different views -->
+            <section class="tabs-section">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('children')">Children</button>
+                    <button class="tab-btn" onclick="switchTab('tree')">Tree</button>
+                    <button class="tab-btn" onclick="switchTab('search')">Search</button>
+                    <button class="tab-btn" onclick="switchTab('agent')">AI Analysis</button>
+                    <button class="tab-btn" onclick="switchTab('config')">Settings</button>
+                </div>
+
+                <!-- Children Tab -->
+                <div id="children-tab" class="tab-content active">
+                    <h3>Children</h3>
+                    <div id="childrenList" class="list-container"></div>
+                </div>
+
+                <!-- Tree Tab -->
+                <div id="tree-tab" class="tab-content">
+                    <h3>Proposition Tree</h3>
+                    <div id="treeView" class="tree-container"></div>
+                </div>
+
+                <!-- Search Tab -->
+                <div id="search-tab" class="tab-content">
+                    <h3>Search</h3>
+                    <div class="search-input-group">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Search propositions..."
+                            autocomplete="off"
+                        />
+                        <button class="btn btn-primary" onclick="performSearch()">Search</button>
+                    </div>
+                    <div id="searchResults" class="list-container"></div>
+                </div>
+
+                <!-- AI Analysis Tab -->
+                <div id="agent-tab" class="tab-content">
+                    <h3>AI Analysis</h3>
+                    <div class="agent-controls">
+                        <select id="agentAction">
+                            <option value="comment">Comment</option>
+                            <option value="comparison">Comparison</option>
+                            <option value="websearch">Web Search</option>
+                            <option value="reference">References</option>
+                        </select>
+                        <input
+                            type="text"
+                            id="agentTargets"
+                            placeholder="Optional: specific propositions (e.g., 1 1.1)"
+                        />
+                        <button class="btn btn-primary" onclick="invokeAgent()">Analyze</button>
+                    </div>
+                    <div id="agentResponse" class="agent-response"></div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="config-tab" class="tab-content">
+                    <h3>Settings</h3>
+                    <div id="configList" class="config-container"></div>
+                </div>
+            </section>
+
+            <!-- Message/Status -->
+            <section class="messages">
+                <div id="messageBox" class="message hidden"></div>
+                <div id="errorBox" class="error hidden"></div>
+            </section>
+
+            <!-- Command History -->
+            <section class="history-section">
+                <h3>History</h3>
+                <div id="commandHistory" class="history-list"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Tractatus Web Interface &copy; 2024</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
