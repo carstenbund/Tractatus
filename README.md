@@ -226,6 +226,3 @@ none yet
 **Tractatus ORM** builds a symbolic database that makes hierarchical thought structures machine-navigable.
 It begins with Wittgenstein but generalizes into a universal framework for recursive texts, allowing translation, commentary, and computational interpretation.
 
----
-
-Would you like me to format this as a `README.md` (with Markdown headings, code fences, etc.) for direct inclusion in your repository?
