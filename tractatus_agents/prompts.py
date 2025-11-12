@@ -15,6 +15,7 @@ def build_prompt_pair(
     action: str,
     payload: str,
     context: str | None = None,
+    language: str | None = None,
 ) -> dict[str, str]:
     """
     Build (system, user) prompt pair for the given action and payload.
@@ -23,12 +24,18 @@ def build_prompt_pair(
         action: The agent action (comment, compare, websearch, reference)
         payload: The proposition text(s) to analyze
         context: Optional contextual information (parent/children propositions)
+        language: Optional language code ("de" for German, "en" for English)
 
     Returns:
         Dictionary with 'system' and 'user' keys for LLM consumption.
     """
     # Optional context hint
     ctx_block = f"\n\nContext:\n{context.strip()}" if context else ""
+
+    # Language instruction for German output
+    lang_instruction = ""
+    if language and language.lower() == "de":
+        lang_instruction = "\n\n(Please respond in German.)"
 
     # Action-specific user instructions
     action_prompts = {
@@ -58,5 +65,5 @@ def build_prompt_pair(
 
     return {
         "system": SYSTEM_PROMPT,
-        "user": f"{user_instruction}\n\n{payload.strip()}{ctx_block}",
+        "user": f"{user_instruction}\n\n{payload.strip()}{ctx_block}{lang_instruction}",
     }

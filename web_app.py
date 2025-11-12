@@ -203,16 +203,25 @@ def api_translate():
 
 @app.route("/api/agent", methods=["POST"])
 def api_agent():
-    """Invoke LLM agent."""
+    """Invoke LLM agent.
+
+    Request JSON:
+        action: str - The agent action (comment, comparison, websearch, reference)
+        targets: list[str] - Optional list of proposition names
+        language: str - Optional language code ("de" or "en")
+    """
     data = request.get_json() or {}
     action = data.get("action", "").strip()
     targets = data.get("targets", [])
+    language = data.get("language", "").strip()
 
     if not action:
         return jsonify({"success": False, "error": "Action required"})
 
     service = get_service()
-    result = service.agent(action, targets if targets else None)
+    result = service.agent(
+        action, targets if targets else None, language=language or None
+    )
 
     if "error" in result:
         return jsonify({"success": False, "error": result["error"]})

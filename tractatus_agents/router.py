@@ -50,8 +50,16 @@ class AgentRouter:
         propositions: Iterable[PropositionLike] | None,
         *,
         payload: str | None = None,
+        language: str | None = None,
     ) -> LLMResponse:
-        """Execute an agent action for the supplied propositions or payload."""
+        """Execute an agent action for the supplied propositions or payload.
+
+        Args:
+            action: The LLM action to perform
+            propositions: Propositions to analyze
+            payload: Optional pre-built payload (overrides propositions)
+            language: Optional language code (e.g., "de" for German)
+        """
 
         if payload is None:
             if propositions is None:
@@ -59,13 +67,13 @@ class AgentRouter:
             payload = self._build_payload(propositions)
 
         if action is AgentAction.COMMENT:
-            return self._llm_agent.comment(payload)
+            return self._llm_agent.comment(payload, language=language)
         if action is AgentAction.COMPARISON:
-            return self._llm_agent.compare(payload)
+            return self._llm_agent.compare(payload, language=language)
         if action is AgentAction.WEBSEARCH:
-            return self._llm_agent.websearch(payload)
+            return self._llm_agent.websearch(payload, language=language)
         if action is AgentAction.REFERENCE:
-            return self._llm_agent.reference(payload)
+            return self._llm_agent.reference(payload, language=language)
 
         raise ValueError(f"Unsupported action: {action}")
 

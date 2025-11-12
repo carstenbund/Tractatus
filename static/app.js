@@ -7,6 +7,7 @@ const MAX_HISTORY = 20;
 
 // State
 let commandHistory = [];
+let currentLanguage = 'en';
 
 // DOM Elements
 const commandInput = document.getElementById('commandInput');
@@ -333,6 +334,7 @@ async function apiAgent(action, targets) {
             body: JSON.stringify({
                 action: action || 'comment',
                 targets: targets && targets.length > 0 ? targets : [],
+                language: currentLanguage,
             }),
         });
         const data = await res.json();
@@ -352,6 +354,17 @@ function invokeAgent() {
     const targetsStr = agentTargets.value.trim();
     const targets = targetsStr ? targetsStr.split(/\s+/) : [];
     apiAgent(action, targets);
+}
+
+function changeLanguage() {
+    const select = document.getElementById('languageSelect');
+    currentLanguage = select.value;
+    showMessage(`Language changed to ${currentLanguage === 'de' ? 'Deutsch' : 'English'}`);
+
+    // Reload current proposition in new language
+    if (document.getElementById('currentName').textContent !== 'No proposition loaded') {
+        loadInitialData();
+    }
 }
 
 async function setConfigValue(key) {

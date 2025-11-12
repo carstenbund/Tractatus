@@ -61,6 +61,29 @@ section {
     margin-bottom: 30px;
 }
 
+.language-section {
+    background: #f0f0f0;
+    padding: 15px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.language-section label {
+    font-weight: bold;
+    color: #333;
+}
+
+.language-section select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
 /* Input and Buttons */
 .input-group,
 .search-input-group {
