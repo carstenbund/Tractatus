@@ -154,6 +154,28 @@ You can also combine navigation and LLM calls inline with prefixes such as
 If no OpenAI credentials are configured the CLI falls back to an echo agent,
 so the command structure can be explored without an external dependency.
 
+### Web Interface
+
+For a more visual, browser-based experience, use the **Flask web wrapper**:
+
+```bash
+pip install flask flask-cors
+python web_app.py
+# Visit http://localhost:5000
+```
+
+The web interface provides:
+
+* **Interactive UI** with tabbed browsing (Children, Tree, Search, AI Analysis, Settings)
+* **REST API** for all operations (use `curl` or any HTTP client)
+* **Command history** for quick re-execution
+* **Real-time configuration** panel
+* **Beautiful, responsive design** optimized for both desktop and mobile
+
+See [WEB_INTERFACE.md](WEB_INTERFACE.md) for complete documentation on the REST API, endpoints, and usage examples.
+
+The web and CLI share the same **service layer** (`TractatusService`), ensuring consistency across both interfaces.
+
 ---
 
 ## **7. Design Philosophy**
