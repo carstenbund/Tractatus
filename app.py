@@ -4,6 +4,7 @@ from __future__ import annotations
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
+import os
 from tractatus_config import TrcliConfig
 from tractatus_orm.database import SessionLocal, init_db
 from tractatus_service import TractatusService
@@ -312,6 +313,6 @@ def internal_error(error):
     """Handle 500 errors."""
     return jsonify({"success": False, "error": "Internal server error"}), 500
 
-
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
