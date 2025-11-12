@@ -26,8 +26,6 @@
     flex-direction: column;
     min-height: 100vh;
     background: #fff;
-    border-radius: 0;
-    box-shadow: none;
   }
 
   header {
@@ -56,17 +54,14 @@
     overflow-y: auto;
   }
 
-  /* Command Input + Buttons */
-  .command-section {
-    margin-bottom: 10px;
-  }
-
+  /* Command Input */
   .input-group {
     display: flex;
     gap: 6px;
+    margin-bottom: 8px;
   }
 
-  #commandInput {
+  input[type="text"] {
     flex: 1;
     padding: 8px;
     font-size: 0.85em;
@@ -75,30 +70,32 @@
   }
 
   .btn-primary {
-    padding: 8px;
-    font-size: 0.8em;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 8px 10px;
+    font-size: 0.85em;
     border: none;
     border-radius: 4px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     color: #fff;
-    min-width: 64px;
+    flex-shrink: 0;
   }
 
-  /* Quick Nav Buttons Grid */
+  /* --- Navigation Buttons in One Row --- */
   .quick-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-bottom: 10px;
   }
 
   .btn-quick {
-    padding: 8px;
+    flex: 1;
+    padding: 8px 0;
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 0.8em;
     text-align: center;
+    white-space: nowrap;
   }
 
   /* Proposition Display */
@@ -124,7 +121,7 @@
     padding: 6px;
     border-radius: 4px;
     overflow-y: auto;
-    max-height: 140px;
+    max-height: 160px;
   }
 
   .prop-meta {
@@ -137,8 +134,8 @@
   .tabs-section {
     background: #fff;
     border-radius: 6px;
-    margin-bottom: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
   }
 
   .tabs {
@@ -150,11 +147,11 @@
 
   .tab-btn {
     flex: 1;
-    padding: 8px;
+    padding: 8px 6px;
     font-size: 0.8em;
     border: none;
     background: #f8f8f8;
-    white-space: nowrap;
+    text-align: center;
   }
 
   .tab-btn.active {
@@ -164,13 +161,16 @@
   }
 
   .tab-content {
+    display: none;
     padding: 8px;
     font-size: 0.85em;
-    max-height: 300px;
-    overflow-y: auto;
   }
 
-  /* Children / List */
+  .tab-content.active {
+    display: block;
+  }
+
+  /* Lists and Children */
   .list-container {
     max-height: 280px;
     overflow-y: auto;
@@ -195,10 +195,10 @@
     color: #555;
   }
 
-  /* Config / Settings */
+  /* Config/Settings Grid */
   .config-container {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
 
@@ -217,11 +217,11 @@
 
   .config-item-value {
     display: flex;
-    gap: 6px;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .config-item input {
-    flex: 1;
     padding: 6px;
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -233,11 +233,11 @@
     color: #fff;
     border: none;
     border-radius: 3px;
-    padding: 6px 8px;
+    padding: 6px;
     font-size: 0.8em;
   }
 
-  /* Agent & Search Areas */
+  /* Agent & Search */
   .agent-controls,
   .search-input-group {
     display: flex;
@@ -266,7 +266,6 @@
     border-top: 1px solid #ddd;
   }
 }
-
 
 
 /* ==========================================
