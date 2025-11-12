@@ -207,8 +207,15 @@ class TractatusService:
         self,
         action: str,
         targets: list[str] | None = None,
+        language: str | None = None,
     ) -> dict | None:
-        """Invoke LLM agent on propositions."""
+        """Invoke LLM agent on propositions.
+
+        Args:
+            action: The agent action (comment, comparison, websearch, reference)
+            targets: Optional list of proposition names to analyze
+            language: Optional language code ("de" for German, "en" for English)
+        """
         try:
             action_enum = AgentAction.from_cli_token(action)
         except ValueError:
@@ -226,15 +233,18 @@ class TractatusService:
         else:
             return {"error": "No target propositions specified and no current node."}
 
-        # Build payload
-        payload = self._build_agent_payload(propositions)
+        # Build payload in selected language
+        lang = language or self.config.get("lang")
+        payload = self._build_agent_payload(propositions, language=lang)
 
         # Get response from agent
-        response = self.agent_router.perform(action_enum, propositions, payload=payload)
+        response = self.agent_router.perform(
+            action_enum, propositions, payload=payload, language=lang
+        )
 
         return {
             "action": response.action,
-            "propositions": [self._proposition_to_dict(p) for p in propositions],
+            "propositions": [self._proposition_to_dict(p, language=lang) for p in propositions],
             "content": response.content,
         }
 
@@ -251,21 +261,67 @@ class TractatusService:
                 propositions.append(prop)
         return propositions
 
-    def _build_agent_payload(self, propositions: list[Proposition]) -> str:
-        """Build text payload for agent from propositions."""
-        blocks = [f"{p.name}: {p.text}" for p in propositions]
+    def _build_agent_payload(
+        self, propositions: list[Proposition], language: str | None = None
+    ) -> str:
+        """Build text payload for agent from propositions in specified language."""
+        lang = language or self.config.get("lang")
+        blocks = []
+        for p in propositions:
+            text = self._get_text_in_language(p, lang)
+            blocks.append(f"{p.name}: {text}")
         return "\n\n".join(blocks)
 
-    def _proposition_to_dict(self, prop: Proposition) -> dict:
-        """Convert proposition to dictionary."""
+    def _get_text_in_language(self, prop: Proposition, language: str | None = None) -> str:
+        """Get proposition text in specified language.
+
+        Args:
+            prop: The proposition
+            language: Language code ("de" for German original, "en" for English translation)
+
+        Returns:
+            The proposition text in the requested language, or German original if not found.
+        """
+        lang = (language or self.config.get("lang")).lower()
+
+        # German original - return main text
+        if lang.startswith("de"):
+            return prop.text
+
+        # English - find first English translation
+        if lang.startswith("en"):
+            for trans in prop.translations:
+                if trans.lang and trans.lang.lower().startswith("en"):
+                    return trans.text
+            # Fallback to German if no English translation
+            return prop.text
+
+        # Default to German for unknown languages
+        return prop.text
+
+    def _proposition_to_dict(
+        self, prop: Proposition, language: str | None = None
+    ) -> dict:
+        """Convert proposition to dictionary with language-aware text.
+
+        Args:
+            prop: The proposition to convert
+            language: Optional language code ("de" for German, "en" for English)
+
+        Returns:
+            Dictionary with proposition data in the requested language.
+        """
         display_length = self.config.get("display_length")
+        lang = language or self.config.get("lang")
+        text = self._get_text_in_language(prop, lang)
         return {
             "id": prop.id,
             "name": prop.name,
-            "text": prop.text,
-            "text_short": prop.text[:display_length],
+            "text": text,
+            "text_short": text[:display_length],
             "parent_id": prop.parent_id,
             "level": prop.level,
+            "language": lang.lower()[:2],  # Return the language used
         }
 
     def _render_tree_data(self, node: Proposition, depth: int = 0) -> list[dict]:
