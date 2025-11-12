@@ -25,7 +25,7 @@ const agentResponse = document.getElementById('agentResponse');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
-const commandHistory = document.getElementById('commandHistory');
+commandHistory = document.getElementById('commandHistory');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
