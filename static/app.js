@@ -26,7 +26,7 @@ const agentResponse = document.getElementById('agentResponse');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
-commandHistory = document.getElementById('commandHistory');
+const commandHistoryEl = document.getElementById('commandHistory');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -538,8 +538,7 @@ function addToHistory(command) {
         commandHistory.shift();
     }
 
-    const historyList = document.getElementById('commandHistory');
-    historyList.innerHTML = commandHistory
+    commandHistoryEl.innerHTML = commandHistory
         .slice()
         .reverse()
         .map(
