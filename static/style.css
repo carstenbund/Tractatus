@@ -3,6 +3,10 @@
    MOBILE (320px - 480px)
    ========================================== */
 
+/* ==========================================
+   MOBILE (320px - 480px)
+   ========================================== */
+
 @media (max-width: 480px) {
   * {
     box-sizing: border-box;
@@ -13,8 +17,17 @@
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: #333;
     margin: 0;
-    padding: 6px;
+    padding: 0;
     font-size: 13px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #fff;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   header {
@@ -22,66 +35,69 @@
     color: #fff;
     padding: 10px 8px;
     text-align: center;
-    border-radius: 6px 6px 0 0;
   }
 
   header h1 {
-    font-size: 1.1em;
+    font-size: 1em;
     margin: 0;
-    text-overflow: ellipsis;
-    overflow: hidden;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   header .subtitle {
-    display: inline;
     font-size: 0.75em;
     opacity: 0.9;
   }
 
   main {
+    flex: 1;
     padding: 8px;
+    overflow-y: auto;
+  }
+
+  /* Command Input + Buttons */
+  .command-section {
+    margin-bottom: 10px;
   }
 
   .input-group {
     display: flex;
     gap: 6px;
-    margin-bottom: 10px;
   }
 
-  input[type="text"] {
+  #commandInput {
     flex: 1;
-    padding: 10px 8px;
-    font-size: 0.9em;
+    padding: 8px;
+    font-size: 0.85em;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
 
   .btn-primary {
-    padding: 10px;
-    font-size: 0.85em;
+    padding: 8px;
+    font-size: 0.8em;
+    background: linear-gradient(135deg, #667eea, #764ba2);
     border: none;
     border-radius: 4px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
     color: #fff;
-    flex-shrink: 0;
-    min-width: 70px;
+    min-width: 64px;
   }
 
-  /* Button Grid */
+  /* Quick Nav Buttons Grid */
   .quick-buttons {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 6px;
-    margin-bottom: 10px;
+    margin-top: 8px;
   }
 
   .btn-quick {
-    padding: 10px;
+    padding: 8px;
     background: #f5f5f5;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.85em;
+    font-size: 0.8em;
     text-align: center;
   }
 
@@ -95,76 +111,162 @@
   }
 
   .prop-name {
-    font-size: 1.1em;
+    font-size: 1em;
     color: #667eea;
     margin-bottom: 4px;
   }
 
   .prop-text {
-    font-size: 0.9em;
+    font-size: 0.85em;
     line-height: 1.4;
     color: #444;
     background: #fafafa;
     padding: 6px;
     border-radius: 4px;
     overflow-y: auto;
-    max-height: 180px;
+    max-height: 140px;
   }
 
   .prop-meta {
-    font-size: 0.75em;
+    font-size: 0.7em;
     color: #777;
     margin-top: 4px;
   }
 
-  /* Collapsible Children */
+  /* Tabs */
   .tabs-section {
-    border-radius: 6px;
     background: #fff;
-    box-shadow: none;
+    border-radius: 6px;
     margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .tabs {
     display: flex;
-    flex-wrap: wrap;
+    overflow-x: auto;
     border-bottom: 1px solid #eee;
+    -webkit-overflow-scrolling: touch;
   }
 
   .tab-btn {
     flex: 1;
-    font-size: 0.8em;
     padding: 8px;
+    font-size: 0.8em;
     border: none;
     background: #f8f8f8;
+    white-space: nowrap;
   }
 
   .tab-btn.active {
     background: #fff;
     border-bottom: 2px solid #667eea;
+    color: #667eea;
   }
 
   .tab-content {
     padding: 8px;
     font-size: 0.85em;
-  }
-
-  /* Scrollable Children */
-  .list-container,
-  .tree-container {
-    max-height: 250px;
+    max-height: 300px;
     overflow-y: auto;
   }
 
+  /* Children / List */
+  .list-container {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+
+  .list-item {
+    padding: 8px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+
+  .list-item-name {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 0.9em;
+    margin-bottom: 3px;
+  }
+
+  .list-item-text {
+    font-size: 0.8em;
+    color: #555;
+  }
+
+  /* Config / Settings */
+  .config-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .config-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+  }
+
+  .config-item-key {
+    color: #667eea;
+    font-weight: bold;
+    margin-bottom: 4px;
+    font-size: 0.9em;
+  }
+
+  .config-item-value {
+    display: flex;
+    gap: 6px;
+  }
+
+  .config-item input {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 0.8em;
+  }
+
+  .config-item button {
+    background: #667eea;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 8px;
+    font-size: 0.8em;
+  }
+
+  /* Agent & Search Areas */
+  .agent-controls,
+  .search-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .agent-response {
+    background: #fafafa;
+    border-left: 3px solid #764ba2;
+    padding: 8px;
+    border-radius: 4px;
+    min-height: 60px;
+    font-size: 0.8em;
+    overflow-y: auto;
+  }
+
+  /* Footer */
   footer {
     text-align: center;
-    padding: 8px;
+    padding: 6px;
     font-size: 0.7em;
     color: #777;
     background: #f5f5f5;
     border-top: 1px solid #ddd;
   }
 }
+
 
 
 /* ==========================================
