@@ -30,6 +30,7 @@ const searchResults = document.getElementById('searchResults');
 const agentAction = document.getElementById('agentAction');
 const agentTargets = document.getElementById('agentTargets');
 const agentResponse = document.getElementById('agentResponse');
+const agentSpinner = document.getElementById('agentSpinner');
 const agentPrompt = document.getElementById('agentPrompt');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
@@ -104,10 +105,62 @@ function executeCommandFromInput() {
 }
 
 /**
- * Execute a command
+ * Execute a command with support for CLI-style shortcuts
  */
 function executeCommand(command) {
-    const parts = command.split(/\s+/);
+    const text = command.trim();
+    if (!text) return;
+
+    // --- 1. Handle "ag:" prefix (e.g., "ag:comment 1.1" or "ag:1") ---
+    if (text.startsWith('ag:')) {
+        const remainder = text.substring(3).trim();
+        if (remainder) {
+            const parts = remainder.split(/\s+/);
+            // Check if first part looks like an action
+            const actions = ['comment', 'comparison', 'compare', 'websearch', 'web', 'reference', 'ref'];
+            if (actions.includes(parts[0].toLowerCase())) {
+                apiAgent(parts[0].toLowerCase(), parts.slice(1), '');
+            } else {
+                // Treat as targets with default comment action
+                apiAgent('comment', parts, '');
+            }
+        }
+        return;
+    }
+
+    // --- 2. Handle inline agent (e.g., "1 ag" or "1 ag:comment") ---
+    if (text.includes(' ag')) {
+        const [head, tail] = text.split(/\s+ag/, 2);
+        if (head) {
+            // First execute the navigation
+            executeCommand(head);
+        }
+        // Then execute agent action
+        if (tail && tail.startsWith(':')) {
+            // "1 ag:comment" format
+            const action = tail.substring(1).trim().split(/\s+/)[0] || 'comment';
+            apiAgent(action, [], '');
+        } else {
+            // "1 ag" format - default to comment
+            apiAgent('comment', [], '');
+        }
+        return;
+    }
+
+    // --- 3. Handle range queries (e.g., "1-2" or "1:2") ---
+    if (/^\d+(\.\d+)*\s*[-:]\s*\d+(\.\d+)*$/.test(text)) {
+        apiGet(text);
+        return;
+    }
+
+    // --- 4. Handle bare numbers or id:/name: prefixes ---
+    if (/^\d/.test(text) || text.startsWith('id:') || text.startsWith('name:')) {
+        apiGet(text);
+        return;
+    }
+
+    // --- 5. Standard command parsing ---
+    const parts = text.split(/\s+/);
     const cmd = parts[0].toLowerCase();
     const args = parts.slice(1);
 
@@ -147,7 +200,7 @@ function executeCommand(command) {
             break;
         case 'ag':
         case 'agent':
-            apiAgent(args[0] || 'comment', args.slice(1));
+            apiAgent(args[0] || 'comment', args.slice(1), '');
             break;
         default:
             showError(`Unknown command: ${cmd}`);
@@ -370,6 +423,14 @@ async function apiTranslate(lang) {
 
 async function apiAgent(action, targets, userInput) {
     try {
+        // Clear previous response and show spinner
+        if (agentResponse) {
+            agentResponse.innerHTML = '';
+        }
+        if (agentSpinner) {
+            agentSpinner.classList.remove('hidden');
+        }
+
         const res = await fetch(`${API_BASE}/agent`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -382,12 +443,21 @@ async function apiAgent(action, targets, userInput) {
         });
         const data = await res.json();
 
+        // Hide spinner
+        if (agentSpinner) {
+            agentSpinner.classList.add('hidden');
+        }
+
         if (data.success) {
             displayAgentResponse(data.data, userInput);
         } else {
             showError(data.error);
         }
     } catch (err) {
+        // Hide spinner on error
+        if (agentSpinner) {
+            agentSpinner.classList.add('hidden');
+        }
         showError(`API error: ${err}`);
     }
 }
