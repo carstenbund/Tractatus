@@ -30,6 +30,7 @@ const searchResults = document.getElementById('searchResults');
 const agentAction = document.getElementById('agentAction');
 const agentTargets = document.getElementById('agentTargets');
 const agentResponse = document.getElementById('agentResponse');
+const agentSpinner = document.getElementById('agentSpinner');
 const agentPrompt = document.getElementById('agentPrompt');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
@@ -422,6 +423,14 @@ async function apiTranslate(lang) {
 
 async function apiAgent(action, targets, userInput) {
     try {
+        // Clear previous response and show spinner
+        if (agentResponse) {
+            agentResponse.innerHTML = '';
+        }
+        if (agentSpinner) {
+            agentSpinner.classList.remove('hidden');
+        }
+
         const res = await fetch(`${API_BASE}/agent`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -434,12 +443,21 @@ async function apiAgent(action, targets, userInput) {
         });
         const data = await res.json();
 
+        // Hide spinner
+        if (agentSpinner) {
+            agentSpinner.classList.add('hidden');
+        }
+
         if (data.success) {
             displayAgentResponse(data.data, userInput);
         } else {
             showError(data.error);
         }
     } catch (err) {
+        // Hide spinner on error
+        if (agentSpinner) {
+            agentSpinner.classList.add('hidden');
+        }
         showError(`API error: ${err}`);
     }
 }
