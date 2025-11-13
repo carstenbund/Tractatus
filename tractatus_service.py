@@ -338,18 +338,47 @@ class TractatusService:
         node: Proposition,
         depth: int = 0,
         max_depth: int | None = None,
+        _visited: set[int] | None = None,
     ) -> list[dict]:
-        """Render tree as structured data."""
-        items = []
-        items.append({
-            "depth": depth,
-            **self._proposition_to_dict(node),
-        })
+        """Render tree as structured data, protecting against cyclic relations.
+
+        Some rows in the underlying dataset contain accidental self-references
+        (e.g. a proposition whose ``parent_id`` matches its own ``id``). Without
+        guarding against this, the recursion below would loop forever and the
+        ``/api/tree`` endpoint would raise a ``RecursionError``. We therefore
+        keep track of nodes visited on the current traversal path and skip any
+        repeated entries.
+        """
+
+        visited = _visited or set()
+        if node.id in visited:
+            # Cycle detected – stop recursion on this branch.
+            return []
+
+        visited.add(node.id)
+
+        items = [
+            {
+                "depth": depth,
+                **self._proposition_to_dict(node),
+            }
+        ]
+
         if max_depth is not None and depth >= max_depth:
+            visited.remove(node.id)
             return items
 
         for child in sorted(node.children, key=lambda ch: self._sort_key(ch.name)):
-            items.extend(self._render_tree_data(child, depth + 1, max_depth=max_depth))
+            items.extend(
+                self._render_tree_data(
+                    child,
+                    depth + 1,
+                    max_depth=max_depth,
+                    _visited=visited,
+                )
+            )
+
+        visited.remove(node.id)
         return items
 
     @staticmethod
