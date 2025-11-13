@@ -4,6 +4,7 @@
 
 const API_BASE = '/api';
 const MAX_HISTORY = 20;
+const LAST_PROP_COOKIE = 'lastPropositionId';
 
 // State
 let commandHistory = [];
@@ -82,7 +83,12 @@ function loadInitialData() {
         .catch(err => showError(`Failed to load config: ${err}`));
 
     // Try to load a starting proposition
-    executeCommand('get 1');
+    const lastPropId = getCookie(LAST_PROP_COOKIE);
+    if (lastPropId) {
+        executeCommand(`get id:${lastPropId}`);
+    } else {
+        executeCommand('get 1');
+    }
 }
 
 /**
@@ -443,6 +449,9 @@ function displayProposition(prop) {
         currentLanguage = prop.language;
     }
     activePropositionId = prop.id;
+    if (prop && typeof prop.id !== 'undefined' && prop.id !== null) {
+        setCookie(LAST_PROP_COOKIE, prop.id, 365);
+    }
     renderTreeCanvas();
 }
 
@@ -528,6 +537,21 @@ function displayAgentResponse(response, userInput) {
         : [];
     appendAgentMessage('assistant', content, actionLabel, propositions);
     switchTab('agent');
+}
+
+function setCookie(name, value, days = 365) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+
+function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
+    for (const cookie of cookies) {
+        if (cookie.startsWith(`${name}=`)) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+    }
+    return null;
 }
 
 function appendAgentMessage(role, message, actionLabel, propositions = []) {
