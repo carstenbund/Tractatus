@@ -14,32 +14,35 @@
         </header>
 
         <main>
-            <!-- Language Selector --
+            <!-- Language selector is available from the Settings tab -->
+            <!--
             <section class="language-section">
                 <label for="languageSelect">Language:</label>
                 <select id="languageSelect" onchange="changeLanguage()">
                     <option value="en">English</option>
                     <option value="de">Deutsch (German)</option>
                 </select>
-            </section>. -->
+            </section>
+            -->
 
             <!-- Command Input -->
             <section class="command-section">
                 <div class="input-group">
+                    <label for="commandInput" class="sr-only">Enter a command</label>
                     <input
                         type="text"
                         id="commandInput"
                         placeholder="Enter command: get 1, list, next, search term, ag comment, etc."
                         autocomplete="off"
                     />
-                    <button id="commandBtn" class="btn btn-primary">Execute</button>
+                    <button type="button" id="commandBtn" class="btn btn-primary">Execute</button>
                 </div>
                 <div class="quick-buttons">
-                    <button class="btn-quick" onclick="executeCommand('get 1')">Home</button>
-                    <button class="btn-quick" onclick="executeCommand('list')">List</button>
-                    <button class="btn-quick" onclick="executeCommand('previous')">Prev</button>
-                    <button class="btn-quick" onclick="executeCommand('next')">Next</button>
-                    <button class="btn-quick" onclick="executeCommand('parent')">Parent</button>
+                    <button type="button" class="btn-quick" onclick="executeCommand('get 1')">Home</button>
+                    <button type="button" class="btn-quick" onclick="executeCommand('list')">List</button>
+                    <button type="button" class="btn-quick" onclick="executeCommand('previous')">Prev</button>
+                    <button type="button" class="btn-quick" onclick="executeCommand('next')">Next</button>
+                    <button type="button" class="btn-quick" onclick="executeCommand('parent')">Parent</button>
                 </div>
             </section>
 
@@ -56,11 +59,11 @@
             <!-- Tabs for different views -->
             <section class="tabs-section">
                 <div class="tabs">
-                    <button class="tab-btn active" onclick="switchTab('children')">Children</button>
-                    <button class="tab-btn" onclick="switchTab('tree')">Tree</button>
-                    <button class="tab-btn" onclick="switchTab('search')">Search</button>
-                    <button class="tab-btn" onclick="switchTab('agent')">AI Analysis</button>
-                    <button class="tab-btn" onclick="switchTab('config')">Settings</button>
+                    <button type="button" class="tab-btn active" onclick="switchTab('children')">Children</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('tree')">Tree</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('search')">Search</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('agent')">AI Analysis</button>
+                    <button type="button" class="tab-btn" onclick="switchTab('config')">Settings</button>
                 </div>
 
                 <!-- Children Tab -->
@@ -79,13 +82,14 @@
                 <div id="search-tab" class="tab-content">
                     <h3>Search</h3>
                     <div class="search-input-group">
+                        <label for="searchInput" class="sr-only">Search propositions</label>
                         <input
                             type="text"
                             id="searchInput"
                             placeholder="Search propositions..."
                             autocomplete="off"
                         />
-                        <button class="btn btn-primary" onclick="performSearch()">Search</button>
+                        <button type="button" class="btn btn-primary" onclick="performSearch()">Search</button>
                     </div>
                     <div id="searchResults" class="list-container"></div>
                 </div>
@@ -105,7 +109,7 @@
                             id="agentTargets"
                             placeholder="Optional: specific propositions (e.g., 1 1.1)"
                         />
-                        <button class="btn btn-primary" onclick="invokeAgent()">Analyze</button>
+                        <button type="button" class="btn btn-primary" onclick="invokeAgent()">Analyze</button>
                     </div>
                     <div id="agentResponse" class="agent-response"></div>
                 </div>
@@ -119,8 +123,8 @@
 
             <!-- Message/Status -->
             <section class="messages">
-                <div id="messageBox" class="message hidden"></div>
-                <div id="errorBox" class="error hidden"></div>
+                <div id="messageBox" class="message hidden" role="status" aria-live="polite"></div>
+                <div id="errorBox" class="error hidden" role="alert" aria-live="assertive"></div>
             </section>
 
             <!-- Command History -->
