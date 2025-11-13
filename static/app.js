@@ -4,10 +4,14 @@
 
 const API_BASE = '/api';
 const MAX_HISTORY = 20;
+const LAST_PROP_COOKIE = 'lastPropositionId';
 
 // State
 let commandHistory = [];
 let currentLanguage = 'en';
+let currentTreeData = [];
+let treeLayoutNodes = [];
+let activePropositionId = null;
 
 // DOM Elements
 const commandInput = document.getElementById('commandInput');
@@ -18,15 +22,28 @@ const propId = document.getElementById('propId');
 const propLevel = document.getElementById('propLevel');
 const childrenList = document.getElementById('childrenList');
 const treeView = document.getElementById('treeView');
+const treeCanvas = document.getElementById('treeCanvas');
+const treeEmpty = document.getElementById('treeEmpty');
+const treeTooltip = document.getElementById('treeTooltip');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
 const agentAction = document.getElementById('agentAction');
 const agentTargets = document.getElementById('agentTargets');
 const agentResponse = document.getElementById('agentResponse');
+const agentPrompt = document.getElementById('agentPrompt');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
 const commandHistoryEl = document.getElementById('commandHistory');
+
+const TREE_LAYOUT = {
+    paddingX: 48,
+    paddingY: 80,
+    levelHeight: 120,
+    nodeRadius: 18,
+    minWidth: 280,
+    minHeight: 280,
+};
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,6 +59,16 @@ function setupEventListeners() {
     searchInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') performSearch();
     });
+
+    if (treeCanvas) {
+        treeCanvas.addEventListener('click', handleTreeCanvasClick);
+        treeCanvas.addEventListener('mousemove', handleTreeCanvasHover);
+        treeCanvas.addEventListener('mouseleave', hideTreeTooltip);
+    }
+
+    window.addEventListener('resize', () => {
+        renderTreeCanvas();
+    });
 }
 
 function loadInitialData() {
@@ -56,7 +83,12 @@ function loadInitialData() {
         .catch(err => showError(`Failed to load config: ${err}`));
 
     // Try to load a starting proposition
-    executeCommand('get 1');
+    const lastPropId = getCookie(LAST_PROP_COOKIE);
+    if (lastPropId) {
+        executeCommand(`get id:${lastPropId}`);
+    } else {
+        executeCommand('get 1');
+    }
 }
 
 /**
@@ -142,6 +174,7 @@ async function apiGet(key) {
         if (data.success) {
             displayProposition(data.data);
             showMessage(`Loaded: ${data.data.name}`);
+            refreshTree();
         } else {
             showError(data.error);
         }
@@ -163,6 +196,7 @@ async function apiList(target) {
             displayChildren(data.data.children);
             if (data.data.current) {
                 displayProposition(data.data.current);
+                refreshTree();
             }
         } else {
             showError(data.error);
@@ -195,6 +229,7 @@ async function apiParent() {
         if (data.success) {
             displayProposition(data.data);
             showMessage('Moved to parent');
+            refreshTree();
         } else {
             showError(data.error);
         }
@@ -211,6 +246,7 @@ async function apiNext() {
         if (data.success) {
             displayProposition(data.data);
             showMessage('Next proposition');
+            refreshTree();
         } else {
             showError(data.error);
         }
@@ -227,6 +263,7 @@ async function apiPrevious() {
         if (data.success) {
             displayProposition(data.data);
             showMessage('Previous proposition');
+            refreshTree();
         } else {
             showError(data.error);
         }
@@ -235,7 +272,8 @@ async function apiPrevious() {
     }
 }
 
-async function apiTree(target) {
+async function apiTree(target, options = {}) {
+    const { updateCurrent = true } = options;
     try {
         const res = await fetch(`${API_BASE}/tree`, {
             method: 'POST',
@@ -246,7 +284,7 @@ async function apiTree(target) {
 
         if (data.success) {
             displayTree(data.data.tree);
-            if (data.data.current) {
+            if (updateCurrent && data.data.current) {
                 displayProposition(data.data.current);
             }
         } else {
@@ -255,6 +293,10 @@ async function apiTree(target) {
     } catch (err) {
         showError(`API error: ${err}`);
     }
+}
+
+function refreshTree(target) {
+    apiTree(target, { updateCurrent: false });
 }
 
 async function apiSearch(term) {
@@ -326,7 +368,7 @@ async function apiTranslate(lang) {
     }
 }
 
-async function apiAgent(action, targets) {
+async function apiAgent(action, targets, userInput) {
     try {
         const res = await fetch(`${API_BASE}/agent`, {
             method: 'POST',
@@ -335,12 +377,13 @@ async function apiAgent(action, targets) {
                 action: action || 'comment',
                 targets: targets && targets.length > 0 ? targets : [],
                 language: currentLanguage,
+                user_input: userInput || '',
             }),
         });
         const data = await res.json();
 
         if (data.success) {
-            displayAgentResponse(data.data);
+            displayAgentResponse(data.data, userInput);
         } else {
             showError(data.error);
         }
@@ -353,7 +396,11 @@ function invokeAgent() {
     const action = agentAction.value;
     const targetsStr = agentTargets.value.trim();
     const targets = targetsStr ? targetsStr.split(/\s+/) : [];
-    apiAgent(action, targets);
+    const userInput = agentPrompt ? agentPrompt.value.trim() : '';
+    apiAgent(action, targets, userInput);
+    if (agentPrompt) {
+        agentPrompt.value = '';
+    }
 }
 
 function changeLanguage() {
@@ -398,6 +445,14 @@ function displayProposition(prop) {
     currentText.textContent = prop.text || '';
     propId.textContent = `ID: ${prop.id}`;
     propLevel.textContent = `Level: ${prop.level || 'N/A'}`;
+    if (prop.language) {
+        currentLanguage = prop.language;
+    }
+    activePropositionId = prop.id;
+    if (prop && typeof prop.id !== 'undefined' && prop.id !== null) {
+        setCookie(LAST_PROP_COOKIE, prop.id, 365);
+    }
+    renderTreeCanvas();
 }
 
 function displayChildren(children) {
@@ -418,19 +473,20 @@ function displayChildren(children) {
 }
 
 function displayTree(treeData) {
-    if (!treeData || treeData.length === 0) {
-        treeView.innerHTML = '<p>No tree data</p>';
+    currentTreeData = Array.isArray(treeData) ? treeData : [];
+    if (!currentTreeData.length) {
+        if (treeEmpty) {
+            treeEmpty.classList.remove('hidden');
+        }
+        hideTreeTooltip();
+        renderTreeCanvas();
         return;
     }
 
-    treeView.innerHTML = treeData
-        .map(
-            (item) =>
-                `<div class="tree-item level-${item.depth}" onclick="executeCommand('get ${item.name}')">
-            ${item.name}: ${item.text_short}
-        </div>`
-        )
-        .join('');
+    if (treeEmpty) {
+        treeEmpty.classList.add('hidden');
+    }
+    renderTreeCanvas();
 }
 
 function displaySearchResults(results) {
@@ -467,13 +523,338 @@ function displayTranslations(translations) {
         .join('');
 }
 
-function displayAgentResponse(response) {
-    agentResponse.classList.remove('empty');
-    agentResponse.textContent = response.content;
+function displayAgentResponse(response, userInput) {
+    if (!agentResponse) return;
+
+    if (userInput) {
+        appendAgentMessage('user', userInput.trim());
+    }
+
+    const actionLabel = response && response.action ? response.action : 'Assistant';
+    const content = response && response.content ? response.content : '';
+    const propositions = response && Array.isArray(response.propositions)
+        ? response.propositions
+        : [];
+    appendAgentMessage('assistant', content, actionLabel, propositions);
     switchTab('agent');
 }
 
+function setCookie(name, value, days = 365) {
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
+
+function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split('; ') : [];
+    for (const cookie of cookies) {
+        if (cookie.startsWith(`${name}=`)) {
+            return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+    }
+    return null;
+}
+
+function appendAgentMessage(role, message, actionLabel, propositions = []) {
+    if (!agentResponse) return;
+
+    const container = document.createElement('div');
+    container.className = `agent-msg agent-msg-${role}`;
+
+    if (role === 'user') {
+        const title = document.createElement('div');
+        title.className = 'agent-msg-title';
+        title.textContent = 'You';
+        container.appendChild(title);
+    }
+
+    if (role === 'assistant' && actionLabel) {
+        const title = document.createElement('div');
+        title.className = 'agent-msg-title';
+        title.textContent = actionLabel;
+        container.appendChild(title);
+    }
+
+    if (
+        role === 'assistant' &&
+        Array.isArray(propositions) &&
+        propositions.length > 0
+    ) {
+        const meta = document.createElement('div');
+        meta.className = 'agent-msg-meta';
+        const names = propositions.map((p) => p.name).join(', ');
+        meta.textContent = `Propositions: ${names}`;
+        container.appendChild(meta);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'agent-msg-content';
+    body.textContent = message || '';
+    container.appendChild(body);
+
+    agentResponse.appendChild(container);
+    agentResponse.scrollTop = agentResponse.scrollHeight;
+}
+
+/**
+ * Tree Rendering & Interaction
+ */
+function renderTreeCanvas() {
+    if (!treeCanvas || !treeView) {
+        return;
+    }
+
+    hideTreeTooltip();
+
+    const containerWidth = treeView.clientWidth || TREE_LAYOUT.minWidth;
+    const width = Math.max(containerWidth, TREE_LAYOUT.minWidth);
+
+    if (!currentTreeData.length) {
+        const canvas = prepareTreeCanvas(width, TREE_LAYOUT.minHeight);
+        if (canvas) {
+            canvas.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        treeLayoutNodes = [];
+        return;
+    }
+
+    const root = buildTreeHierarchy(currentTreeData);
+    if (!root) {
+        const canvas = prepareTreeCanvas(width, TREE_LAYOUT.minHeight);
+        if (canvas) {
+            canvas.ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        treeLayoutNodes = [];
+        return;
+    }
+
+    const { maxDepth, leafCount } = assignTreeCoordinates(root);
+    const height = Math.max(
+        TREE_LAYOUT.minHeight,
+        TREE_LAYOUT.paddingY * 2 + TREE_LAYOUT.levelHeight * Math.max(maxDepth, 1)
+    );
+    const canvas = prepareTreeCanvas(width, height);
+    if (!canvas) {
+        return;
+    }
+
+    const availableWidth = Math.max(
+        canvas.width - TREE_LAYOUT.paddingX * 2,
+        TREE_LAYOUT.minWidth - TREE_LAYOUT.paddingX * 2
+    );
+    const horizontalUnit = leafCount > 1 ? availableWidth / (leafCount - 1) : 0;
+    const centerX = TREE_LAYOUT.paddingX + availableWidth / 2;
+
+    function applyPositions(node) {
+        node.screenX =
+            leafCount > 1
+                ? TREE_LAYOUT.paddingX + node.xIndex * horizontalUnit
+                : centerX;
+        node.screenY = TREE_LAYOUT.paddingY + node.depth * TREE_LAYOUT.levelHeight;
+        node.children.forEach((child) => applyPositions(child));
+    }
+
+    applyPositions(root);
+
+    treeLayoutNodes = [];
+    collectTreeNodes(root);
+
+    const ctx = canvas.ctx;
+    ctx.strokeStyle = '#c3cdf6';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    drawTreeConnections(ctx, root);
+
+    drawTreeNodes(ctx, root);
+}
+
+function prepareTreeCanvas(width, height) {
+    if (!treeCanvas) return null;
+    const ratio = window.devicePixelRatio || 1;
+    const adjustedWidth = Math.max(width, TREE_LAYOUT.minWidth);
+    const adjustedHeight = Math.max(height, TREE_LAYOUT.minHeight);
+    treeCanvas.width = adjustedWidth * ratio;
+    treeCanvas.height = adjustedHeight * ratio;
+    treeCanvas.style.width = `${adjustedWidth}px`;
+    treeCanvas.style.height = `${adjustedHeight}px`;
+    const ctx = treeCanvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(ratio, ratio);
+    ctx.clearRect(0, 0, adjustedWidth, adjustedHeight);
+    return { ctx, width: adjustedWidth, height: adjustedHeight };
+}
+
+function buildTreeHierarchy(treeData) {
+    if (!Array.isArray(treeData) || !treeData.length) {
+        return null;
+    }
+
+    // Reconstruct the hierarchy using the depth values provided by the API
+    // response. Building the tree purely from ``parent_id`` can re-create
+    // accidental cycles that exist in the database (e.g. a node referencing
+    // itself as the parent), which in turn caused recursive rendering helpers
+    // to overflow the stack. By relying on the pre-computed depth ordering we
+    // preserve the intended structure and avoid self-references.
+    const nodes = treeData.map((item) => ({ ...item, children: [] }));
+    const stack = [];
+
+    nodes.forEach((node) => {
+        while (stack.length && stack[stack.length - 1].depth >= node.depth) {
+            stack.pop();
+        }
+
+        if (stack.length) {
+            stack[stack.length - 1].children.push(node);
+        }
+
+        stack.push(node);
+    });
+
+    return nodes[0];
+}
+
+function assignTreeCoordinates(root) {
+    let leafIndex = 0;
+    let maxDepth = 0;
+
+    function traverse(node, depth) {
+        node.depth = depth;
+        maxDepth = Math.max(maxDepth, depth);
+        if (!node.children.length) {
+            node.xIndex = leafIndex;
+            leafIndex += 1;
+        } else {
+            node.children.forEach((child) => traverse(child, depth + 1));
+            const first = node.children[0].xIndex;
+            const last = node.children[node.children.length - 1].xIndex;
+            node.xIndex = (first + last) / 2;
+        }
+    }
+
+    traverse(root, 0);
+    return { maxDepth, leafCount: Math.max(leafIndex, 1) };
+}
+
+function collectTreeNodes(node) {
+    treeLayoutNodes.push(node);
+    node.children.forEach((child) => collectTreeNodes(child));
+}
+
+function drawTreeConnections(ctx, node) {
+    node.children.forEach((child) => {
+        ctx.beginPath();
+        ctx.moveTo(node.screenX, node.screenY);
+        ctx.lineTo(child.screenX, child.screenY);
+        ctx.stroke();
+        drawTreeConnections(ctx, child);
+    });
+}
+
+function drawTreeNodes(ctx, node) {
+    const isActive = activePropositionId === node.id;
+    const radius = TREE_LAYOUT.nodeRadius;
+
+    ctx.beginPath();
+    ctx.fillStyle = isActive ? '#667eea' : '#ffffff';
+    ctx.strokeStyle = isActive ? '#667eea' : '#2f2f2f';
+    ctx.lineWidth = isActive ? 3 : 1.5;
+    ctx.arc(node.screenX, node.screenY, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = isActive ? '600 13px "Segoe UI", sans-serif' : '12px "Segoe UI", sans-serif';
+    ctx.fillStyle = isActive ? '#ffffff' : '#333333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(node.name, node.screenX, node.screenY - radius - 8);
+
+    node.children.forEach((child) => drawTreeNodes(ctx, child));
+}
+
+function handleTreeCanvasClick(event) {
+    if (!treeCanvas || treeLayoutNodes.length === 0) return;
+    const { x, y } = getRelativeCanvasPoint(event);
+    const hit = findTreeNodeAt(x, y);
+    if (hit) {
+        executeCommand(`get ${hit.name}`);
+    }
+}
+
+function handleTreeCanvasHover(event) {
+    if (!treeCanvas || treeLayoutNodes.length === 0 || !treeTooltip) return;
+    const { x, y } = getRelativeCanvasPoint(event);
+    const hit = findTreeNodeAt(x, y);
+    if (!hit) {
+        hideTreeTooltip();
+        return;
+    }
+    showTreeTooltip(hit, event);
+}
+
+function getRelativeCanvasPoint(event) {
+    const rect = treeCanvas.getBoundingClientRect();
+    return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+    };
+}
+
+function findTreeNodeAt(x, y) {
+    const radius = TREE_LAYOUT.nodeRadius + 4;
+    return treeLayoutNodes.find((node) => {
+        const dx = x - node.screenX;
+        const dy = y - node.screenY;
+        return Math.sqrt(dx * dx + dy * dy) <= radius;
+    });
+}
+
+function showTreeTooltip(node, event) {
+    if (!treeTooltip || !treeView) return;
+
+    treeTooltip.innerHTML = '';
+    const title = document.createElement('div');
+    title.className = 'tree-tooltip-title';
+    title.textContent = node.name;
+    const body = document.createElement('div');
+    body.className = 'tree-tooltip-body';
+    body.textContent = node.text_short || node.text || '';
+    treeTooltip.appendChild(title);
+    treeTooltip.appendChild(body);
+
+    treeTooltip.classList.remove('hidden');
+    treeTooltip.classList.add('show');
+    treeTooltip.style.left = '0px';
+    treeTooltip.style.top = '0px';
+
+    const containerRect = treeView.getBoundingClientRect();
+    const tooltipWidth = treeTooltip.offsetWidth;
+    const tooltipHeight = treeTooltip.offsetHeight;
+
+    let left = event.clientX - containerRect.left + 16;
+    let top = event.clientY - containerRect.top - tooltipHeight - 16;
+
+    const maxLeft = containerRect.width - tooltipWidth - 16;
+    left = Math.max(16, Math.min(left, maxLeft));
+    if (top < 16) {
+        top = event.clientY - containerRect.top + 16;
+    }
+    const maxTop = containerRect.height - tooltipHeight - 16;
+    top = Math.max(16, Math.min(top, maxTop));
+
+    treeTooltip.style.left = `${left}px`;
+    treeTooltip.style.top = `${top}px`;
+}
+
+function hideTreeTooltip() {
+    if (!treeTooltip) return;
+    treeTooltip.classList.add('hidden');
+    treeTooltip.classList.remove('show');
+}
+
 function displayConfig(config) {
+    if (config && typeof config.lang === 'string' && config.lang) {
+        currentLanguage = config.lang;
+    }
     configList.innerHTML = Object.entries(config)
         .map(
             ([key, value]) =>
@@ -496,7 +877,7 @@ function displayConfig(config) {
 /**
  * Utility Functions
  */
-function switchTab(tabName) {
+function switchTab(tabName, evt) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach((tab) => {
         tab.classList.remove('active');
@@ -510,7 +891,17 @@ function switchTab(tabName) {
     if (tab) {
         tab.classList.add('active');
         // Mark button as active
-        event.target.classList.add('active');
+        if (evt && evt.target) {
+            evt.target.classList.add('active');
+        } else {
+            const button = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+            if (button) {
+                button.classList.add('active');
+            }
+        }
+        if (tabName === 'tree') {
+            renderTreeCanvas();
+        }
     }
 }
 

@@ -16,6 +16,7 @@ def build_prompt_pair(
     payload: str,
     context: str | None = None,
     language: str | None = None,
+    user_input: str | None = None,
 ) -> dict[str, str]:
     """
     Build (system, user) prompt pair for the given action and payload.
@@ -25,6 +26,7 @@ def build_prompt_pair(
         payload: The proposition text(s) to analyze
         context: Optional contextual information (parent/children propositions)
         language: Optional language code ("de" for German, "en" for English)
+        user_input: Optional user request appended to the prompt
 
     Returns:
         Dictionary with 'system' and 'user' keys for LLM consumption.
@@ -63,7 +65,13 @@ def build_prompt_pair(
 
     user_instruction = action_prompts.get(action.lower(), action_prompts["comment"])
 
+    extra_request = ""
+    if user_input:
+        extra_request = f"\n\nAdditional request:\n{user_input.strip()}"
+
     return {
         "system": SYSTEM_PROMPT,
-        "user": f"{user_instruction}\n\n{payload.strip()}{ctx_block}{lang_instruction}",
+        "user": (
+            f"{user_instruction}\n\n{payload.strip()}{ctx_block}{lang_instruction}{extra_request}"
+        ),
     }

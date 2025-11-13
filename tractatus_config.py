@@ -13,6 +13,7 @@ class TrcliConfig:
         "lines_per_output": 10,  # Max lines to display for list/tree output
         "lang": "en",  # Default language for translations
         "llm_max_tokens": 500,  # Max tokens for LLM responses
+        "tree_max_depth": 0,  # 0 means show full depth; positive limits tree traversal
     }
 
     def __init__(self, config_file: str | Path | None = None):
@@ -90,6 +91,9 @@ class TrcliConfig:
         elif key == "llm_max_tokens":
             if not (10 <= value <= 4000):
                 return False, "llm_max_tokens must be between 10 and 4000"
+        elif key == "tree_max_depth":
+            if not (0 <= value <= 12):
+                return False, "tree_max_depth must be between 0 and 12"
 
         return True, ""
 
