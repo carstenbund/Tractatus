@@ -210,18 +210,23 @@ def api_agent():
         action: str - The agent action (comment, comparison, websearch, reference)
         targets: list[str] - Optional list of proposition names
         language: str - Optional language code ("de" or "en")
+        user_input: str - Optional user prompt to include with the propositions
     """
     data = request.get_json() or {}
     action = data.get("action", "").strip()
     targets = data.get("targets", [])
     language = data.get("language", "").strip()
+    user_input = data.get("user_input", "").strip()
 
     if not action:
         return jsonify({"success": False, "error": "Action required"})
 
     service = get_service()
     result = service.agent(
-        action, targets if targets else None, language=language or None
+        action,
+        targets if targets else None,
+        language=language or None,
+        user_input=user_input or None,
     )
 
     if "error" in result:

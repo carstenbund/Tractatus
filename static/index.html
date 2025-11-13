@@ -59,11 +59,11 @@
             <!-- Tabs for different views -->
             <section class="tabs-section">
                 <div class="tabs">
-                    <button type="button" class="tab-btn active" onclick="switchTab('children')">Children</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('tree')">Tree</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('search')">Search</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('agent')">AI Analysis</button>
-                    <button type="button" class="tab-btn" onclick="switchTab('config')">Settings</button>
+                    <button type="button" class="tab-btn active" data-tab="children" onclick="switchTab('children', event)">Children</button>
+                    <button type="button" class="tab-btn" data-tab="tree" onclick="switchTab('tree', event)">Tree</button>
+                    <button type="button" class="tab-btn" data-tab="search" onclick="switchTab('search', event)">Search</button>
+                    <button type="button" class="tab-btn" data-tab="agent" onclick="switchTab('agent', event)">AI Analysis</button>
+                    <button type="button" class="tab-btn" data-tab="config" onclick="switchTab('config', event)">Settings</button>
                 </div>
 
                 <!-- Children Tab -->
@@ -75,7 +75,16 @@
                 <!-- Tree Tab -->
                 <div id="tree-tab" class="tab-content">
                     <h3>Proposition Tree</h3>
-                    <div id="treeView" class="tree-container"></div>
+                    <div id="treeView" class="tree-container">
+                        <canvas
+                            id="treeCanvas"
+                            class="tree-canvas"
+                            role="img"
+                            aria-label="Visualization of the current proposition tree"
+                        ></canvas>
+                        <div id="treeEmpty" class="tree-empty">No tree data</div>
+                        <div id="treeTooltip" class="tree-tooltip hidden" role="tooltip"></div>
+                    </div>
                 </div>
 
                 <!-- Search Tab -->
@@ -98,17 +107,24 @@
                 <div id="agent-tab" class="tab-content">
                     <h3>AI Analysis</h3>
                     <div class="agent-controls">
-                        <select id="agentAction">
-                            <option value="comment">Comment</option>
-                            <option value="comparison">Comparison</option>
-                            <option value="websearch">Web Search</option>
-                            <option value="reference">References</option>
-                        </select>
-                        <input
-                            type="text"
-                            id="agentTargets"
-                            placeholder="Optional: specific propositions (e.g., 1 1.1)"
-                        />
+                        <div class="agent-row">
+                            <select id="agentAction">
+                                <option value="comment">Comment</option>
+                                <option value="comparison">Comparison</option>
+                                <option value="websearch">Web Search</option>
+                                <option value="reference">References</option>
+                            </select>
+                            <input
+                                type="text"
+                                id="agentTargets"
+                                placeholder="Optional: specific propositions (e.g., 1 1.1)"
+                            />
+                        </div>
+                        <textarea
+                            id="agentPrompt"
+                            rows="3"
+                            placeholder="Add your question or context for the AI assistant..."
+                        ></textarea>
                         <button type="button" class="btn btn-primary" onclick="invokeAgent()">Analyze</button>
                     </div>
                     <div id="agentResponse" class="agent-response"></div>

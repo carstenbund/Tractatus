@@ -51,6 +51,7 @@ class AgentRouter:
         *,
         payload: str | None = None,
         language: str | None = None,
+        user_input: str | None = None,
     ) -> LLMResponse:
         """Execute an agent action for the supplied propositions or payload.
 
@@ -59,6 +60,7 @@ class AgentRouter:
             propositions: Propositions to analyze
             payload: Optional pre-built payload (overrides propositions)
             language: Optional language code (e.g., "de" for German)
+            user_input: Optional user-provided message to append to the prompt
         """
 
         if payload is None:
@@ -67,13 +69,13 @@ class AgentRouter:
             payload = self._build_payload(propositions)
 
         if action is AgentAction.COMMENT:
-            return self._llm_agent.comment(payload, language=language)
+            return self._llm_agent.comment(payload, language=language, user_input=user_input)
         if action is AgentAction.COMPARISON:
-            return self._llm_agent.compare(payload, language=language)
+            return self._llm_agent.compare(payload, language=language, user_input=user_input)
         if action is AgentAction.WEBSEARCH:
-            return self._llm_agent.websearch(payload, language=language)
+            return self._llm_agent.websearch(payload, language=language, user_input=user_input)
         if action is AgentAction.REFERENCE:
-            return self._llm_agent.reference(payload, language=language)
+            return self._llm_agent.reference(payload, language=language, user_input=user_input)
 
         raise ValueError(f"Unsupported action: {action}")
 
