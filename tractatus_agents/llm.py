@@ -76,20 +76,52 @@ class LLMAgent:
         self._client = client or EchoLLMClient()
         self._max_tokens = max_tokens
 
-    def comment(self, payload: str, language: str | None = None) -> LLMResponse:
-        prompt_pair = build_prompt_pair("comment", payload, language=language)
+    def comment(
+        self,
+        payload: str,
+        language: str | None = None,
+        *,
+        user_input: str | None = None,
+    ) -> LLMResponse:
+        prompt_pair = build_prompt_pair(
+            "comment", payload, language=language, user_input=user_input
+        )
         return self._ask("Comment", prompt_pair)
 
-    def compare(self, payload: str, language: str | None = None) -> LLMResponse:
-        prompt_pair = build_prompt_pair("comparison", payload, language=language)
+    def compare(
+        self,
+        payload: str,
+        language: str | None = None,
+        *,
+        user_input: str | None = None,
+    ) -> LLMResponse:
+        prompt_pair = build_prompt_pair(
+            "comparison", payload, language=language, user_input=user_input
+        )
         return self._ask("Comparison", prompt_pair)
 
-    def websearch(self, payload: str, language: str | None = None) -> LLMResponse:
-        prompt_pair = build_prompt_pair("websearch", payload, language=language)
+    def websearch(
+        self,
+        payload: str,
+        language: str | None = None,
+        *,
+        user_input: str | None = None,
+    ) -> LLMResponse:
+        prompt_pair = build_prompt_pair(
+            "websearch", payload, language=language, user_input=user_input
+        )
         return self._ask("Websearch", prompt_pair)
 
-    def reference(self, payload: str, language: str | None = None) -> LLMResponse:
-        prompt_pair = build_prompt_pair("reference", payload, language=language)
+    def reference(
+        self,
+        payload: str,
+        language: str | None = None,
+        *,
+        user_input: str | None = None,
+    ) -> LLMResponse:
+        prompt_pair = build_prompt_pair(
+            "reference", payload, language=language, user_input=user_input
+        )
         return self._ask("Reference", prompt_pair)
 
     def _ask(self, action: str, prompt_pair: dict[str, str]) -> LLMResponse:
