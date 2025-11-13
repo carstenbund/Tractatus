@@ -689,23 +689,28 @@ function buildTreeHierarchy(treeData) {
         return null;
     }
 
-    const nodes = new Map();
-    treeData.forEach((item) => {
-        nodes.set(item.id, { ...item, children: [] });
-    });
-
-    let root = nodes.get(treeData[0].id) || null;
+    // Reconstruct the hierarchy using the depth values provided by the API
+    // response. Building the tree purely from ``parent_id`` can re-create
+    // accidental cycles that exist in the database (e.g. a node referencing
+    // itself as the parent), which in turn caused recursive rendering helpers
+    // to overflow the stack. By relying on the pre-computed depth ordering we
+    // preserve the intended structure and avoid self-references.
+    const nodes = treeData.map((item) => ({ ...item, children: [] }));
+    const stack = [];
 
     nodes.forEach((node) => {
-        if (node.parent_id && nodes.has(node.parent_id)) {
-            nodes.get(node.parent_id).children.push(node);
+        while (stack.length && stack[stack.length - 1].depth >= node.depth) {
+            stack.pop();
         }
+
+        if (stack.length) {
+            stack[stack.length - 1].children.push(node);
+        }
+
+        stack.push(node);
     });
 
-    if (!root && nodes.size) {
-        root = nodes.values().next().value;
-    }
-    return root;
+    return nodes[0];
 }
 
 function assignTreeCoordinates(root) {
