@@ -159,20 +159,53 @@ so the command structure can be explored without an external dependency.
 For a more visual, browser-based experience, use the **Flask web wrapper**:
 
 ```bash
-pip install flask flask-cors
+pip install -r requirements.txt
 python web_app.py
 # Visit http://localhost:5000
 ```
 
-The web interface provides:
+**Features:**
 
-* **Interactive UI** with tabbed browsing (Children, Tree, Search, AI Analysis, Settings)
-* **REST API** for all operations (use `curl` or any HTTP client)
-* **Command history** for quick re-execution
-* **Real-time configuration** panel
-* **Beautiful, responsive design** optimized for both desktop and mobile
+* **Interactive tabbed UI:**
+  - **Children** — Browse immediate children of current proposition
+  - **Tree** — Visualize full subtree hierarchy
+  - **Search** — Full-text search across propositions
+  - **AI Analysis** — Generate comments, comparisons, web searches, references
+  - **Settings** — Configure preferences in real-time
 
-See [WEB_INTERFACE.md](WEB_INTERFACE.md) for complete documentation on the REST API, endpoints, and usage examples.
+* **REST API** for all operations (use `curl` or any HTTP client):
+  - `POST /api/get` — Fetch a proposition
+  - `POST /api/list` — List children
+  - `POST /api/children` — Get immediate children of current
+  - `POST /api/parent` — Navigate to parent
+  - `POST /api/next` — Navigate to next sibling
+  - `POST /api/previous` — Navigate to previous sibling
+  - `POST /api/search` — Full-text search
+  - `POST /api/agent` — Invoke LLM analysis
+  - `GET /api/config` — Get all settings
+  - `POST /api/config/set` — Update setting
+
+* **Command history** with clickable recall — Re-execute previous commands instantly
+
+* **Language selector** — Switch between German original and English translation, affecting both UI text and LLM response language
+
+* **Real-time configuration** — Update preferences like `llm_max_tokens` and `display_length` without restarting
+
+* **Beautiful, responsive design** — Optimized for mobile, tablet, and desktop with:
+  - 44px minimum touch targets on all buttons
+  - Mobile-first three-breakpoint layout system
+  - Smooth transitions and interactive feedback
+  - Gradient background with modern aesthetics
+
+**Example API Call:**
+
+```bash
+curl -X POST http://localhost:5000/api/get \
+  -H "Content-Type: application/json" \
+  -d '{"key": "1.1"}'
+```
+
+See [WEB_INTERFACE.md](WEB_INTERFACE.md) for complete REST API documentation with examples.
 
 The web and CLI share the same **service layer** (`TractatusService`), ensuring consistency across both interfaces.
 
@@ -206,18 +239,78 @@ The design is **data-agnostic** — any hierarchical corpus can be imported by p
 
 ## **9. Current Status**
 
-Implemented:
-none yet
+### **Implemented Features** ✅
 
-🚧 Next steps:
+**Core Infrastructure:**
+* ✅ Database schema and ORM model (SQLAlchemy)
+* ✅ Two-phase ingestion with hierarchy resolution
+* ✅ Multilingual support (German original + English translation)
 
+**Command-Line Interface (CLI):**
+* ✅ Interactive command prompt with command history
+* ✅ Navigation commands: `get`, `list`, `children`, `parent`, `next`, `previous`
+* ✅ Proposition search with `search <term>`
+* ✅ Translation lookup with `translations` and `translate <lang>`
+* ✅ LLM agent integration: `ag comment`, `ag comparison`, `ag websearch`, `ag reference`
+* ✅ Preference management: `set <key> <value>` with persistent `.trclirc` config
+* ✅ Configuration commands: `config`, `config reset`
+* ✅ Configurable settings:
+  - `display_length` - Output width for truncation
+  - `lines_per_output` - Number of results per display
+  - `llm_max_tokens` - Control LLM response length (10-4000 tokens)
+  - `lang` - Language preference (en/de)
 
-* Database schema and ORM model
-* Two-phase ingestion (hierarchy + numeric linking)
-* Simple CLI and exploration script
+**Web Interface:**
+* ✅ Flask REST API with JSON responses
+* ✅ Single-page application (SPA) with tabbed UI
+* ✅ Interactive browser-based navigation
+* ✅ Command execution from web interface
+* ✅ Real-time command history with clickable recall
+* ✅ Language selector affecting both text display and LLM responses
+* ✅ Settings panel for runtime configuration
+* ✅ Beautiful responsive design optimized for mobile, tablet, and desktop
 
-* Translation ingestion via ORM
-* Optional REST API or graph export layer
+**LLM Integration:**
+* ✅ OpenAI integration with configurable response length
+* ✅ System prompt + user prompt architecture for better context
+* ✅ Action-specific prompting (comment, comparison, websearch, reference)
+* ✅ Language-aware response generation
+* ✅ Echo fallback mode for testing without API keys
+
+**Responsive Design:**
+* ✅ Mobile-first CSS with three breakpoints
+  - Mobile (≤480px): Optimized layout, 44px touch buttons, hidden history
+  - Tablet (481-768px): Balanced spacing, 2-column grids
+  - Desktop (769px+): Full features, hover effects, multi-column layouts
+* ✅ Touch-friendly button sizing (44px minimum)
+* ✅ Responsive typography and spacing
+
+**Deployment & Configuration:**
+* ✅ Koyeb deployment configuration
+* ✅ Docker containerization (Dockerfile, docker-compose.yml)
+* ✅ Environment-based configuration (DATABASE_URL, PORT, OPENAI_API_KEY)
+* ✅ Production setup with gunicorn
+* ✅ Comprehensive deployment documentation
+
+**Bug Fixes:**
+* ✅ Fixed command history functionality (variable naming conflict resolution)
+
+### **Bug Fixes & Recent Updates**
+
+**Latest Fix (Current Branch):**
+Fixed critical bug in command history where the `commandHistory` array was being overwritten with a DOM element reference. This prevented history tracking from working. The fix:
+- Renamed DOM element variable to `commandHistoryEl`
+- Preserved `commandHistory` array for command storage
+- History now properly tracks and displays executed commands
+- Clicking history items restores commands to input field
+
+🚧 **Next Steps:**
+
+* Export to RDF / Neo4j for semantic graph analysis
+* Full-text search implementation (SQLite FTS or PostgreSQL)
+* Comment layers and scholarly annotations
+* Support for additional hierarchical texts (Bible, Qur'an, etc.)
+* Advanced analytics and proposition relationship visualization
 
 ---
 
