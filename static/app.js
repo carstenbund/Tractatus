@@ -564,7 +564,7 @@ function updateThemeForProposition(prop) {
     const name = prop && typeof prop.name === 'string' ? prop.name.trim() : '';
     const topLevelNumber = name ? parseFloat(name) : NaN;
 
-    if (!Number.isNaN(topLevelNumber) && topLevelNumber >= 7) {
+    if (!Number.isNaN(topLevelNumber) && topLevelNumber > 7) {
         document.body.classList.add('chapter-post-seven');
     } else {
         document.body.classList.remove('chapter-post-seven');
