@@ -63,28 +63,49 @@ class TranslationJob:
         )
         return self.session.scalars(stmt).first()
 
+
     def _translate(self, proposition: Proposition) -> str:
-        system_message = (
-            "You are a careful literary translator working on Ludwig Wittgenstein's "
-            "Tractatus Logico-Philosophicus."
+        system = (
+            "You are a careful literary translator for Ludwig Wittgenstein's "
+            "Tractatus Logico-Philosophicus. Translate faithfully and clearly."
         )
-        user_message = (
-            "Provide a natural translation of the following proposition into the "
-            f"target language '{self.lang}'.\n"
-            "Return only the translated text without commentary.\n"
+        user = (
+            f"Translate the following proposition into European French (fr-FR). Maintain the philosophical tone and syntactic clarity.\n" 
+            f"Return ONLY the translated text, no commentary.\n"
             f"Proposition {proposition.name}: {proposition.text}"
         )
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": user_message},
-            ],
-            max_tokens=600,
-        )
-        content = response.choices[0].message.content
-        return content.strip() if content else ""
-
+        
+        # Up to 3 retries for intermittent network/model errors
+        for attempt in range(3):
+            try:
+                response = self.client.responses.create(
+                    model=self.model,
+                    input=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user},
+                    ],
+                    max_output_tokens=600,
+                )
+                
+                content = response.output_text
+                
+                if not content:
+                    raise ValueError("Empty response from model.")
+                    
+                # deterministically strip formatting/markdown noise
+                cleaned = content.strip()
+                cleaned = cleaned.strip("`")
+                cleaned = cleaned.replace("\n\n", "\n").strip()
+                
+                return cleaned
+            
+            except Exception as e:
+                if attempt == 2:
+                    raise
+                time.sleep(1.5 * (attempt + 1))  # backoff
+                
+        return ""
+    
     def _store_translation(self, proposition: Proposition, text: str, existing: Translation | None) -> None:
         source = f"OpenAI {self.model}"
         if self.dry_run:
@@ -191,3 +212,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+    
