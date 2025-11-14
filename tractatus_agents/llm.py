@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
+from .cache import AgentCache, get_default_cache
 from .prompts import build_prompt_pair
 
 
@@ -38,6 +39,7 @@ class LLMResponse:
     action: str
     content: str
     prompt: str
+    cached: bool = False
 
 
 class EchoLLMClient:
@@ -72,9 +74,16 @@ class EchoLLMClient:
 class LLMAgent:
     """Encapsulates prompt engineering for the different CLI agent actions."""
 
-    def __init__(self, client: LLMClient | None = None, *, max_tokens: int | None = 500) -> None:
+    def __init__(
+        self,
+        client: LLMClient | None = None,
+        *,
+        max_tokens: int | None = 500,
+        cache: AgentCache | None = None,
+    ) -> None:
         self._client = client or EchoLLMClient()
         self._max_tokens = max_tokens
+        self._cache = cache or get_default_cache()
 
     def comment(
         self,
@@ -126,11 +135,16 @@ class LLMAgent:
 
     def _ask(self, action: str, prompt_pair: dict[str, str]) -> LLMResponse:
         """Ask the LLM using system + user prompt pair."""
+        full_prompt = f"{prompt_pair['system']}\n\n{prompt_pair['user']}"
+
+        cached_content = self._cache.lookup(action, full_prompt)
+        if cached_content is not None:
+            return LLMResponse(action=action, content=cached_content, prompt=full_prompt, cached=True)
+
         content = self._client.complete(
             system=prompt_pair["system"],
             user=prompt_pair["user"],
             max_tokens=self._max_tokens,
         )
-        # For response logging, concatenate system and user
-        full_prompt = f"{prompt_pair['system']}\n\n{prompt_pair['user']}"
+        self._cache.store(action, full_prompt, content)
         return LLMResponse(action=action, content=content, prompt=full_prompt)

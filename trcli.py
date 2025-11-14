@@ -576,10 +576,11 @@ class TractatusCLI(cmd.Cmd):
         return ordered
 
     def _display_agent_response(self, response: "LLMResponse", scope: str | None = None) -> None:
+        cached_note = " (cached)" if getattr(response, "cached", False) else ""
         if scope:
-            print(f"[LLM] {response.action} for {scope}")
+            print(f"[LLM] {response.action}{cached_note} for {scope}")
         else:
-            print(f"[LLM] {response.action}")
+            print(f"[LLM] {response.action}{cached_note}")
         print(response.content)
 
     def _configure_agent_router(self) -> AgentRouter:

@@ -255,6 +255,7 @@ class TractatusService:
             "propositions": [self._proposition_to_dict(p, language=lang) for p in propositions],
             "content": response.content,
             "user_input": user_input or "",
+            "cached": getattr(response, "cached", False),
         }
 
     def _resolve_targets(self, targets: list[str]) -> list[Proposition]:
