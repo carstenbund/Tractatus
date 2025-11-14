@@ -173,12 +173,34 @@ def ingest_multilang_xml(file_path: str | Path) -> int:
     return len(lookup)
 
 
-def main() -> None:
-    xml_path = Path(__file__).resolve().parents[1] / "tractatus.xml"
+def main(argv: list[str] | None = None) -> None:
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Ingest Tractatus propositions and translations from an XML file."
+    )
+    parser.add_argument(
+        "xml_file",
+        nargs="?",
+        help=(
+            "Path to the XML file to import. "
+            "Defaults to the canonical tractatus.xml in the project root."
+        ),
+    )
+    args = parser.parse_args(argv)
+
+    if args.xml_file:
+        xml_path = Path(args.xml_file).expanduser()
+        if not xml_path.is_absolute():
+            xml_path = Path.cwd() / xml_path
+    else:
+        xml_path = Path(__file__).resolve().parents[1] / "tractatus.xml"
+
     if not xml_path.exists():
         print(f"Error: XML file not found at {xml_path}")
-        print("Please ensure tractatus.xml exists in the project root directory.")
+        print("Please ensure the path is correct or provide a different XML file.")
         return
+
     count = ingest_multilang_xml(xml_path)
     print(f"Ingested {count} propositions with translations from {xml_path.name}.")
 
