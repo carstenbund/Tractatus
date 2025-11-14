@@ -3,6 +3,22 @@
    GLOBAL HELPERS
    ========================================== */
 
+:root {
+  --color-primary: #667eea;
+  --color-primary-rgb: 102, 126, 234;
+  --color-secondary: #764ba2;
+  --color-secondary-rgb: 118, 75, 162;
+  --color-primary-contrast: #ffffff;
+}
+
+body.chapter-post-seven {
+  --color-primary: #1fa2ff;
+  --color-primary-rgb: 31, 162, 255;
+  --color-secondary: #12d8fa;
+  --color-secondary-rgb: 18, 216, 250;
+  --color-primary-contrast: #ffffff;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -26,7 +42,7 @@
 
   body {
     font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: #333;
     margin: 0;
     padding: 0;
@@ -41,7 +57,7 @@
   }
 
   header {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: #fff;
     padding: 10px 8px;
     text-align: center;
@@ -86,7 +102,7 @@
     font-size: 0.85em;
     border: none;
     border-radius: 4px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: #fff;
     flex-shrink: 0;
   }
@@ -113,7 +129,7 @@
   /* Proposition Display */
   .proposition-section {
     background: #fff;
-    border-left: 3px solid #667eea;
+    border-left: 3px solid var(--color-primary);
     padding: 8px;
     border-radius: 4px;
     margin-bottom: 10px;
@@ -121,7 +137,7 @@
 
   .prop-name {
     font-size: 1.1em;
-    color: #667eea;
+    color: var(--color-primary);
     margin-bottom: 4px;
   }
 
@@ -168,8 +184,8 @@
 
   .tab-btn.active {
     background: #fff;
-    border-bottom: 2px solid #667eea;
-    color: #667eea;
+    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-primary);
   }
 
   .tab-content {
@@ -197,7 +213,7 @@
 
   .list-item-name {
     font-weight: bold;
-    color: #667eea;
+    color: var(--color-primary);
     font-size: 0.9em;
     margin-bottom: 3px;
   }
@@ -221,7 +237,7 @@
   }
 
   .config-item-key {
-    color: #667eea;
+    color: var(--color-primary);
     font-weight: bold;
     margin-bottom: 4px;
     font-size: 0.9em;
@@ -241,7 +257,7 @@
   }
 
   .config-item button {
-    background: #667eea;
+    background: var(--color-primary);
     color: #fff;
     border: none;
     border-radius: 3px;
@@ -260,7 +276,7 @@
 
   .agent-response {
     background: #fafafa;
-    border-left: 3px solid #764ba2;
+    border-left: 3px solid var(--color-secondary);
     padding: 8px;
     border-radius: 4px;
     min-height: 60px;
@@ -277,7 +293,7 @@
     padding: 20px;
     min-height: 100px;
     background: #fafafa;
-    border-left: 3px solid #764ba2;
+    border-left: 3px solid var(--color-secondary);
     border-radius: 4px;
     margin-bottom: 10px;
   }
@@ -288,7 +304,7 @@
 
   .spinner {
     border: 3px solid #f3f3f3;
-    border-top: 3px solid #667eea;
+    border-top: 3px solid var(--color-primary);
     border-radius: 50%;
     width: 24px;
     height: 24px;
@@ -332,7 +348,7 @@
 
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: #333;
         line-height: 1.6;
         min-height: 100vh;
@@ -353,7 +369,7 @@
     }
 
     header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: white;
         padding: 20px 15px;
         text-align: center;
@@ -437,7 +453,7 @@
     input[type="number"]:focus,
     select:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     .btn {
@@ -451,13 +467,13 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: white;
     }
 
     .btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.35);
     }
 
     .quick-buttons {
@@ -478,9 +494,9 @@
     }
 
     .btn-quick:hover {
-        background: #667eea;
+        background: var(--color-primary);
         color: white;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     /* Proposition Display */
@@ -488,12 +504,12 @@
         background: #f9f9f9;
         padding: 15px;
         border-radius: 8px;
-        border-left: 5px solid #667eea;
+        border-left: 5px solid var(--color-primary);
         margin-bottom: 20px;
     }
 
     .prop-name {
-        color: #667eea;
+        color: var(--color-primary);
         font-size: 1.5em;
         margin-bottom: 8px;
     }
@@ -553,8 +569,8 @@
 
     .tab-btn.active {
         background: white;
-        border-bottom-color: #667eea;
-        color: #667eea;
+        border-bottom-color: var(--color-primary);
+        color: var(--color-primary);
     }
 
     .tab-content {
@@ -568,7 +584,7 @@
 
     .tab-content h3 {
         margin-bottom: 12px;
-        color: #667eea;
+        color: var(--color-primary);
         font-size: 1.05em;
     }
 
@@ -590,12 +606,12 @@
 
     .list-item:hover {
         background: #f9f9f9;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     .list-item-name {
         font-weight: bold;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 4px;
         font-size: 0.95em;
     }
@@ -747,13 +763,13 @@
         border-radius: 6px;
         padding: 10px 12px;
         background: #fff;
-        border: 1px solid rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.2);
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
     .agent-msg-user {
         align-self: flex-end;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(102, 126, 234, 0.2));
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.1), rgba(var(--color-primary-rgb), 0.2));
     }
 
     .agent-msg-assistant {
@@ -762,7 +778,7 @@
 
     .agent-msg-title {
         font-weight: 600;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 6px;
         font-size: 0.85em;
         text-transform: uppercase;
@@ -798,7 +814,7 @@
 
     .config-item-key {
         font-weight: bold;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 6px;
         font-size: 0.95em;
     }
@@ -815,7 +831,7 @@
 
     .config-item button {
         padding: 10px 14px;
-        background: #667eea;
+        background: var(--color-primary);
         color: white;
         border: none;
         border-radius: 3px;
@@ -883,7 +899,7 @@
         border-radius: 3px;
         font-family: monospace;
         font-size: 0.85em;
-        border-left: 3px solid #667eea;
+        border-left: 3px solid var(--color-primary);
         cursor: pointer;
     }
 
@@ -902,7 +918,7 @@
         width: 20px;
         height: 20px;
         border: 3px solid #f3f3f3;
-        border-top: 3px solid #667eea;
+        border-top: 3px solid var(--color-primary);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -926,7 +942,7 @@
 
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: #333;
         line-height: 1.6;
         min-height: 100vh;
@@ -946,7 +962,7 @@
     }
 
     header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: white;
         padding: 30px;
         text-align: center;
@@ -1027,7 +1043,7 @@
     input[type="number"]:focus,
     select:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     .btn {
@@ -1040,13 +1056,13 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
         color: white;
     }
 
     .btn-primary:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 5px 15px rgba(var(--color-primary-rgb), 0.4);
     }
 
     .quick-buttons {
@@ -1065,9 +1081,9 @@
     }
 
     .btn-quick:hover {
-        background: #667eea;
+        background: var(--color-primary);
         color: white;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     /* Proposition Display */
@@ -1075,12 +1091,12 @@
         background: #f9f9f9;
         padding: 20px;
         border-radius: 8px;
-        border-left: 5px solid #667eea;
+        border-left: 5px solid var(--color-primary);
         margin-bottom: 30px;
     }
 
     .prop-name {
-        color: #667eea;
+        color: var(--color-primary);
         font-size: 1.8em;
         margin-bottom: 10px;
     }
@@ -1137,8 +1153,8 @@
 
     .tab-btn.active {
         background: white;
-        border-bottom-color: #667eea;
-        color: #667eea;
+        border-bottom-color: var(--color-primary);
+        color: var(--color-primary);
     }
 
     .tab-content {
@@ -1152,7 +1168,7 @@
 
     .tab-content h3 {
         margin-bottom: 15px;
-        color: #667eea;
+        color: var(--color-primary);
     }
 
     /* Lists */
@@ -1172,12 +1188,12 @@
 
     .list-item:hover {
         background: #f9f9f9;
-        border-color: #667eea;
+        border-color: var(--color-primary);
     }
 
     .list-item-name {
         font-weight: bold;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 5px;
     }
 
@@ -1221,7 +1237,7 @@
         max-width: 260px;
         padding: 10px 12px;
         background: rgba(255, 255, 255, 0.96);
-        border: 1px solid rgba(102, 126, 234, 0.35);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.35);
         border-radius: 6px;
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         font-size: 0.85em;
@@ -1302,7 +1318,7 @@
 
     .spinner {
         border: 4px solid #f3f3f3;
-        border-top: 4px solid #667eea;
+        border-top: 4px solid var(--color-primary);
         border-radius: 50%;
         width: 32px;
         height: 32px;
@@ -1320,13 +1336,13 @@
         border-radius: 8px;
         padding: 12px 14px;
         background: #fff;
-        border: 1px solid rgba(102, 126, 234, 0.3);
+        border: 1px solid rgba(var(--color-primary-rgb), 0.3);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
     .agent-msg-user {
         align-self: flex-end;
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(102, 126, 234, 0.24));
+        background: linear-gradient(135deg, rgba(var(--color-primary-rgb), 0.12), rgba(var(--color-primary-rgb), 0.24));
     }
 
     .agent-msg-assistant {
@@ -1335,7 +1351,7 @@
 
     .agent-msg-title {
         font-weight: 600;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 6px;
         font-size: 0.9em;
         letter-spacing: 0.05em;
@@ -1372,7 +1388,7 @@
 
     .config-item-key {
         font-weight: bold;
-        color: #667eea;
+        color: var(--color-primary);
         margin-bottom: 5px;
     }
 
@@ -1388,7 +1404,7 @@
 
     .config-item button {
         padding: 8px 12px;
-        background: #667eea;
+        background: var(--color-primary);
         color: white;
         border: none;
         border-radius: 3px;
@@ -1453,7 +1469,7 @@
         border-radius: 3px;
         font-family: monospace;
         font-size: 0.9em;
-        border-left: 3px solid #667eea;
+        border-left: 3px solid var(--color-primary);
         cursor: pointer;
     }
 
@@ -1472,7 +1488,7 @@
         width: 20px;
         height: 20px;
         border: 3px solid #f3f3f3;
-        border-top: 3px solid #667eea;
+        border-top: 3px solid var(--color-primary);
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
