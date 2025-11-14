@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tractatus>
+  <proposition id="7" depth="0">
+    <german>Wovon wir nicht sprechen können, das müssen wir untersuchen.</german>
+    <english>What we cannot speak about, we must examine.</english>
+  </proposition>
+  <proposition id="7.01" depth="2">
+    <german>Das Schweigen bezeichnet nicht eine Grenze, sondern die Schwelle des Unintegrierten.</german>
+    <english>Silence marks not a boundary but the threshold of the unintegrated.</english>
+  </proposition>
+  <proposition id="7.1" depth="1">
+    <german>Die Welt der Tatsachen spiegelt sich in der Welt der Psyche.</german>
+    <english>The world of facts is mirrored by the world of the psyche.</english>
+  </proposition>
+  <proposition id="7.11" depth="2">
+    <german>Der Tractatus beschrieb die Welt als die Gesamtheit der Tatsachen. Das Humanum beschreibt das Selbst als die Gesamtheit der Bedeutungen.</german>
+    <english>The Tractatus described the world as the totality of facts. The Humanum describes the self as the totality of meanings.</english>
+  </proposition>
+  <proposition id="7.12" depth="2">
+    <german>Das logische „Ich“ ist eine Grenze. Das menschliche „Ich“ ist ein noch unbekanntes Inneres.</german>
+    <english>The logical “I” is a boundary. The human “I” is an interior not yet known.</english>
+  </proposition>
+  <proposition id="7.13" depth="2">
+    <german>Das Selbst zu untersuchen heißt, den Schatten zu untersuchen.</german>
+    <english>To examine the self is to examine the shadow.</english>
+  </proposition>
+  <proposition id="7.14" depth="2">
+    <german>Der Schatten enthält alle Tatsachen, die das Ego für gleichgültig erklärte. Er ist nicht das Gegenteil der Logik, sondern ihr Rückstand.</german>
+    <english>The shadow contains all facts the ego declared indifferent. It is not the opposite of logic but its residue.</english>
+  </proposition>
+  <proposition id="7.2" depth="1">
+    <german>Das „Höhere“ (Ethik, Gott) liegt nicht außerhalb der Welt, sondern ist die innere Form, durch die die Psyche der Welt begegnet.</german>
+    <english>The “Higher” (Ethics, God) is not outside the world but the inner form through which the psyche encounters the world.</english>
+  </proposition>
+  <proposition id="7.21" depth="2">
+    <german>Bedeutung wird nicht behauptet; sie ist die Kohärenz des Integrierten.</german>
+    <english>Meaning is not asserted; it is the coherence of what has been integrated.</english>
+  </proposition>
+  <proposition id="7.22" depth="2">
+    <german>Das Gute ist keine Tatsache; es verwirklicht sich durch die Integration des Schattens.</german>
+    <english>The Good is not a fact; it is realized through integration of the shadow.</english>
+  </proposition>
+  <proposition id="7.23" depth="2">
+    <german>Macht ist eine Tatsache. Ethik beginnt, wenn diese Tatsache als Schatten erkannt und nicht unbewusst vollzogen wird.</german>
+    <english>Power is a fact. Ethics begins when this fact is recognized as shadow rather than enacted unconsciously.</english>
+  </proposition>
+  <proposition id="7.3" depth="1">
+    <german>Das logische Selbst ist zeitlos. Das menschliche Selbst ist zeitlich.</german>
+    <english>The logical self is timeless. The human self is temporal.</english>
+  </proposition>
+  <proposition id="7.31" depth="2">
+    <german>Logische Folge ist Struktur. Moralische Folge ist Erzählung.</german>
+    <english>Logical consequence is structure. Moral consequence is narrative.</english>
+  </proposition>
+  <proposition id="7.32" depth="2">
+    <german>Die Rüstung des Tractatus hielt die Zeit an. Das Leben beginnt mit der Rückkehr in die Zeit.</german>
+    <english>The armor of the Tractatus halted time. Life begins with the return to time.</english>
+  </proposition>
+  <proposition id="7.33" depth="2">
+    <german>Heilung ist die Wiederherstellung von Folge.</german>
+    <english>Healing is the restoration of consequence.</english>
+  </proposition>
+  <proposition id="7.4" depth="1">
+    <german>Das Schweigen des Tractatus war eine Mauer. Die Untersuchung des Humanum ist eine Brücke.</german>
+    <english>The silence of the Tractatus was a wall. The examination of the Humanum is a bridge.</english>
+  </proposition>
+  <proposition id="7.41" depth="2">
+    <german>Die Welt der Tatsachen ist gegeben. Die Welt der Bedeutung wird gemacht.</german>
+    <english>The world of facts is given. The world of meaning is made.</english>
+  </proposition>
+  <proposition id="7.42" depth="2">
+    <german>Wo man aus Notwendigkeit schwieg, muss man nun aus Verantwortung sprechen.</german>
+    <english>Where one was silent out of necessity, one must now speak out of responsibility.</english>
+  </proposition>
+  <proposition id="7.5" depth="1">
+    <german>Die Grenze der Sprache ist nicht die Grenze des Selbst.</german>
+    <english>The limit of language is not the limit of the self.</english>
+  </proposition>
+  <proposition id="7.51" depth="2">
+    <german>Was nicht gesagt werden kann, vermag uns dennoch zu verwandeln.</german>
+    <english>What cannot be said may still transform us.</english>
+  </proposition>
+  <proposition id="7.52" depth="2">
+    <german>Das Unsagbare ist nicht sinnlos; es ist der Grund, aus dem Bedeutung wächst.</german>
+    <english>The inexpressible is not meaningless; it is the ground from which meaning grows.</english>
+  </proposition>
+  <proposition id="7.53" depth="2">
+    <german>Leiden beginnt, wenn das Unsagbare verbannt wird. Frieden beginnt, wenn man sich ihm nähert.</german>
+    <english>Suffering begins when the inexpressible is exiled. Peace begins when it is approached.</english>
+  </proposition>
+  <proposition id="7.6" depth="1">
+    <german>Das Selbst kehrt in die Welt zurück, indem es sich im Anderen erkennt.</german>
+    <english>The self returns to the world by recognizing itself in the other.</english>
+  </proposition>
+  <proposition id="7.61" depth="2">
+    <german>Die logische Struktur der Welt ist gemeinsam. Die menschliche Welt wird miterschaffen.</german>
+    <english>The logical structure of the world is shared. The human world is co-created.</english>
+  </proposition>
+  <proposition id="7.62" depth="2">
+    <german>Ethik beginnt, wenn die Grenze des „Ich“ durchlässig wird.</german>
+    <english>Ethics begins when the boundary of the “I” becomes permeable.</english>
+  </proposition>
+  <proposition id="7.63" depth="2">
+    <german>Verantwortung ist die Annahme der Folge für das, was einst aus dem Selbst verbannt war.</german>
+    <english>Responsibility is the acceptance of consequence for what once was exiled from the self.</english>
+  </proposition>
+  <proposition id="7.7" depth="1">
+    <german>Die Aufgabe ist nicht, das Denken zu läutern, sondern sich mit dem Leben zu versöhnen.</german>
+    <english>The task is not to purify thought but to reconcile with life.</english>
+  </proposition>
+  <proposition id="7.71" depth="2">
+    <german>Die Logik zeigt die Form der Welt. Die Liebe zeigt die Form des Selbst.</german>
+    <english>Logic reveals the form of the world. Love reveals the form of the self.</english>
+  </proposition>
+  <proposition id="7.72" depth="2">
+    <german>Philosophie, die im Schweigen endet, ist unvollständig. Philosophie, die in die Welt zurückkehrt, beginnt.</german>
+    <english>Philosophy that ends in silence is incomplete. Philosophy that returns to the world begins.</english>
+  </proposition>
+  <proposition id="7.73" depth="2">
+    <german>Wovon man schwieg, davon muss man nun sprechen, will man ohne Rüstung leben.</german>
+    <english>Whereof one was silent, thereof one must now speak, if one is to live without armor.</english>
+  </proposition>
+  <proposition id="7.74" depth="2">
+    <german>Der menschliche Satz lässt sich nicht schreiben. Er muss gelebt werden.</german>
+    <english>The human proposition cannot be written. It must be lived.</english>
+  </proposition>
+  <proposition id="8" depth="0">
+    <german>Interaktion. Die Welt der Tatsachen und die Welt der Bedeutung bilden eine einzige Wechselwirkung.</german>
+    <english>Interaction. The world of facts and the world of meaning form a single interaction.</english>
+  </proposition>
+  <proposition id="8.01" depth="2">
+    <german>Eine Tatsache wird zur Erfahrung, wenn ihr Relevanz verliehen wird.</german>
+    <english>A fact becomes experience when relevance is conferred.</english>
+  </proposition>
+  <proposition id="8.02" depth="2">
+    <german>Relevanz entsteht aus Identität, Affekt und Erzählung.</german>
+    <english>Relevance arises from identity, affect, and narrative.</english>
+  </proposition>
+  <proposition id="8.03" depth="2">
+    <german>Bedeutung wählt aus, welche Tatsachen in das Selbst eintreten.</german>
+    <english>Meaning selects which facts enter the self.</english>
+  </proposition>
+  <proposition id="8.1" depth="1">
+    <german>Die Auswahl der Tatsachen formt die Wahrnehmung.</german>
+    <english>The selection of facts shapes perception.</english>
+  </proposition>
+  <proposition id="8.11" depth="2">
+    <german>Wahrnehmung ist nicht passiver Empfang, sondern aktive Konfiguration.</german>
+    <english>Perception is not passive reception but active configuration.</english>
+  </proposition>
+  <proposition id="8.12" depth="2">
+    <german>Was gesehen wird, hängt davon ab, was das Selbst zu tragen vermag.</german>
+    <english>What is seen depends on what the self can bear.</english>
+  </proposition>
+  <proposition id="8.13" depth="2">
+    <german>Der Schatten schließt aus, was das Selbst noch nicht integrieren kann.</german>
+    <english>The shadow excludes what the self cannot yet integrate.</english>
+  </proposition>
+  <proposition id="8.2" depth="1">
+    <german>Bedeutung bleibt bestehen, wenn sie kohärent wird.</german>
+    <english>Meaning persists when it becomes coherent.</english>
+  </proposition>
+  <proposition id="8.21" depth="2">
+    <german>Kohärenz ist die Übereinstimmung von Wahrnehmung, Gefühl und Handlung.</german>
+    <english>Coherence is the agreement between perception, emotion, and action.</english>
+  </proposition>
+  <proposition id="8.22" depth="2">
+    <german>Inkohärenz zeigt das Vorhandensein des unintegrierten Schattens.</german>
+    <english>Incoherence reveals the presence of unintegrated shadow.</english>
+  </proposition>
+  <proposition id="8.23" depth="2">
+    <german>Integration stellt Kohärenz her und verwandelt die Bedeutung der Tatsachen.</german>
+    <english>Integration restores coherence and transforms the meaning of facts.</english>
+  </proposition>
+  <proposition id="8.3" depth="1">
+    <german>Kohärenz erzeugt Handlung.</german>
+    <english>Coherence produces action.</english>
+  </proposition>
+  <proposition id="8.31" depth="2">
+    <german>Handlung drückt die Struktur des Selbst aus.</german>
+    <english>Action expresses the structure of the self.</english>
+  </proposition>
+  <proposition id="8.32" depth="2">
+    <german>Handeln heißt, seine implizite Ontologie zu offenbaren.</german>
+    <english>To act is to reveal one’s implicit ontology.</english>
+  </proposition>
+  <proposition id="8.33" depth="2">
+    <german>Handlung verändert das Feld möglicher Tatsachen.</german>
+    <english>Action alters the field of possible facts.</english>
+  </proposition>
+  <proposition id="8.4" depth="1">
+    <german>Die Welt der Tatsachen verändert sich durch Handlung.</german>
+    <english>The world of facts changes through action.</english>
+  </proposition>
+  <proposition id="8.41" depth="2">
+    <german>Neue Tatsachen gestalten den Horizont der Bedeutung um.</german>
+    <english>New facts reshape the horizon of meaning.</english>
+  </proposition>
+  <proposition id="8.42" depth="2">
+    <german>So verändern sich Selbst und Welt gegenseitig.</german>
+    <english>Thus the self and the world modify one another.</english>
+  </proposition>
+  <proposition id="8.5" depth="1">
+    <german>Interaktion ist rekursiv.</german>
+    <english>Interaction is recursive.</english>
+  </proposition>
+  <proposition id="8.51" depth="2">
+    <german>Die Tatsache beeinflusst die Bedeutung. Die Bedeutung beeinflusst die Tatsache.</german>
+    <english>Fact influences meaning. Meaning influences fact.</english>
+  </proposition>
+  <proposition id="8.52" depth="2">
+    <german>Diese Rekursion bildet die menschliche Lage.</german>
+    <english>This recursion forms the human condition.</english>
+  </proposition>
+  <proposition id="8.53" depth="2">
+    <german>Die Rekursion zu unterbrechen heißt leiden. An ihr teilzunehmen heißt leben.</german>
+    <english>To interrupt the recursion is to suffer. To participate in it is to live.</english>
+  </proposition>
+  <proposition id="8.6" depth="1">
+    <german>Die Aufgabe ist nicht, die Welt zu beherrschen, sondern in ein rechtes Verhältnis zur Rekursion zu treten.</german>
+    <english>The task is not to master the world but to enter into right relation with the recursion.</english>
+  </proposition>
+  <proposition id="8.61" depth="2">
+    <german>Rechtes Verhältnis entsteht, wenn Tatsache, Relevanz und Kohärenz übereinstimmen.</german>
+    <english>Right relation arises when fact, relevance, and coherence agree.</english>
+  </proposition>
+  <proposition id="8.62" depth="2">
+    <german>Fallen sie auseinander, zerfällt das Selbst.</german>
+    <english>When these fall apart, the self fragments.</english>
+  </proposition>
+  <proposition id="8.63" depth="2">
+    <german>Heilen heißt, die Rekursion wieder in Einklang zu bringen.</german>
+    <english>To heal is to bring the recursion back into alignment.</english>
+  </proposition>
+  <proposition id="8.7" depth="1">
+    <german>In der Interaktion erschaffen Selbst und Welt einander mit.</german>
+    <english>In interaction, the self and the world co-create one another.</english>
+  </proposition>
+  <proposition id="8.71" depth="2">
+    <german>Die Welt enthüllt das Selbst. Das Selbst enthüllt die Welt.</german>
+    <english>The world reveals the self. The self reveals the world.</english>
+  </proposition>
+  <proposition id="8.72" depth="2">
+    <german>Keines besteht als geschlossenes System.</german>
+    <english>Neither exists as a closed system.</english>
+  </proposition>
+  <proposition id="8.73" depth="2">
+    <german>Jedes vollendet das andere.</german>
+    <english>Each completes the other.</english>
+  </proposition>
+  <proposition id="8.8" depth="1">
+    <german>Interaktion ist die Fortsetzung der Logik mit anderen Mitteln.</german>
+    <english>Interaction is the continuation of logic by other means.</english>
+  </proposition>
+  <proposition id="8.81" depth="2">
+    <german>Die Logik zeigt die Form der Welt. Die Interaktion zeigt die Form des Lebens.</german>
+    <english>Logic shows the form of the world. Interaction shows the form of life.</english>
+  </proposition>
+  <proposition id="8.82" depth="2">
+    <german>Durch Interaktion wird Bedeutung zur Tatsache und Tatsache zur Bedeutung.</german>
+    <english>Through interaction, meaning becomes fact and fact becomes meaning.</english>
+  </proposition>
+  <proposition id="8.83" depth="2">
+    <german>Diese Gegenseitigkeit ist die Grammatik des Menschlichen.</german>
+    <english>This reciprocity is the grammar of the human.</english>
+  </proposition>
+  <proposition id="9" depth="0">
+    <german>Die Ethik der Gruppe.</german>
+    <english>The Ethics of the Group.</english>
+  </proposition>
+  <proposition id="9.0" depth="1">
+    <german>Das individuelle Selbst ist eine Abstraktion; die In-Group (die Gruppe) ist die primäre Einheit des menschlichen Überlebens.</german>
+    <english>The individual self is an abstraction; the In-Group (the Group) is the primary unit of human survival.</english>
+  </proposition>
+  <proposition id="9.01" depth="2">
+    <german>Das isolierte Selbst ist eine biologische und psychologische Unmöglichkeit.</german>
+    <english>The isolated self is a biological and psychological impossibility.</english>
+  </proposition>
+  <proposition id="9.02" depth="2">
+    <german>Die In-Group ist die erste „Rüstung“, sie geht der logischen (Tractatus) oder der persönlichen (Humanus) voraus.</german>
+    <english>The In-Group is the first &quot;armor,&quot; preceding the logical (Tractatus) or the personal (Humanus).</english>
+  </proposition>
+  <proposition id="9.03" depth="2">
+    <german>Die In-Group ist keine Ansammlung von Individuen, sondern ein von Individuen vollzogenes symbolisches System.</german>
+    <english>The In-Group is not a collection of individuals, but a symbolic system enacted by individuals.</english>
+  </proposition>
+  <proposition id="9.04" depth="2">
+    <german>Ethik beginnt innerhalb dieses Systems (9.03), wenn das Selbst (7.11) dem Anderen begegnet.</german>
+    <english>Ethics begins within this system (9.03), when the Self (7.11) encounters the Other.</english>
+  </proposition>
+  <proposition id="9.05" depth="2">
+    <german>Der Andere ist keine Tatsache in der Welt; der Andere ist eine Welt.</german>
+    <english>The Other is not a fact in the world; the Other is a world.</english>
+  </proposition>
+  <proposition id="9.06" depth="2">
+    <german>Der Andere ist ein rekursives System (8.0), dessen Erzählung (7.31) mit der eigenen kollidiert.</german>
+    <english>The Other is a recursive system (8.0) whose narrative (7.31) collides with one&#x27;s own.</english>
+  </proposition>
+  <proposition id="9.1" depth="1">
+    <german>Die In-Group entsteht nicht durch Einschluss, sondern durch Ausschluss.</german>
+    <english>The In-Group is not formed by inclusion, but by exclusion.</english>
+  </proposition>
+  <proposition id="9.11" depth="2">
+    <german>Das „Wir“ wird vollständig durch das „Nicht-Wir“ (den „Anderen“, die Out-Group, den Fremden) definiert.</german>
+    <english>The &quot;We&quot; is defined entirely by the &quot;Not-We&quot; (the &quot;Other,&quot; the out-group, the stranger).</english>
+  </proposition>
+  <proposition id="9.12" depth="2">
+    <german>Die Grenze ist die erste und heiligste Wirklichkeit der In-Group.</german>
+    <english>The boundary is the In-Group&#x27;s first and most sacred reality.</english>
+  </proposition>
+  <proposition id="9.13" depth="2">
+    <german>Der erste Akt der In-Group besteht darin, den Barbaren zu benennen.</german>
+    <english>The first act of the In-Group is to name the barbarian.</english>
+  </proposition>
+  <proposition id="9.14" depth="2">
+    <german>Die Grenze der In-Group wird nicht durch Gewalt aufrechterhalten, sondern durch wechselseitige Anerkennung dessen, wer dazugehört und wer nicht.</german>
+    <english>The boundary of the In-Group is maintained not by force, but by mutual recognition of who belongs and who does not.</english>
+  </proposition>
+  <proposition id="9.2" depth="1">
+    <german>Die In-Group wird durch symbolische Kohärenz zusammengehalten, nicht durch logische Kohärenz.</german>
+    <english>The In-Group is bound by symbolic coherence, not logical coherence.</english>
+  </proposition>
+  <proposition id="9.21" depth="2">
+    <german>Diese Kohärenz ist der geteilte „Mythos“ (Ursprungslegende, Erzählung des Zweckes).</german>
+    <english>This coherence is the shared &quot;myth&quot; (origin story, narrative of purpose).</english>
+  </proposition>
+  <proposition id="9.22" depth="2">
+    <german>Der Mythos wird durch Ritual vergegenwärtigt.</german>
+    <english>The myth is made real through ritual.</english>
+  </proposition>
+  <proposition id="9.23" depth="2">
+    <german>Das Ritual ist die physisch gewordene „affektive Infrastruktur“. Es synchronisiert die Emotionen und Handlungen der Gruppe.</german>
+    <english>Ritual is the &quot;affective infrastructure&quot; made physical. It synchronizes the group&#x27;s emotions and actions.</english>
+  </proposition>
+  <proposition id="9.3" depth="1">
+    <german>Die In-Group wird durch Hierarchie stabilisiert.</german>
+    <english>The In-Group is stabilized by hierarchy.</english>
+  </proposition>
+  <proposition id="9.31" depth="2">
+    <german>Die Hierarchie ist die strukturelle Lösung der In-Group für interne Konkurrenz.</german>
+    <english>Hierarchy is the In-Group&#x27;s structural solution to internal competition.</english>
+  </proposition>
+  <proposition id="9.32" depth="2">
+    <german>Sie ist der Rahmen für die Verteilung von Ressourcen, Sicherheit und Anerkennung.</german>
+    <english>It is the framework for distributing resources, safety, and esteem.</english>
+  </proposition>
+  <proposition id="9.33" depth="2">
+    <german>Status ist das symbolische Kennzeichen der eigenen Position in der Hierarchie.</german>
+    <english>Status is the symbolic marker of one&#x27;s position in the hierarchy.</english>
+  </proposition>
+  <proposition id="9.4" depth="1">
+    <german>Die In-Group ist ein Motor des mimetischen Begehrens.</german>
+    <english>The In-Group is an engine of mimetic desire.</english>
+  </proposition>
+  <proposition id="9.41" depth="2">
+    <german>Das Selbst weiß nicht, was es begehren soll; es lernt zu begehren, was der Andere innerhalb der Gruppe begehrt.</german>
+    <english>The self does not know what to want; it learns to want what the Other within the group wants.</english>
+  </proposition>
+  <proposition id="9.42" depth="2">
+    <german>Dieses geteilte Begehren (Mimesis) erzeugt universale Rivalität, die die Hauptbedrohung jeder Kohäsion darstellt.</german>
+    <english>This shared wanting (mimesis) creates universal rivalry, which is the primary threat to all cohesion.</english>
+  </proposition>
+  <proposition id="9.5" depth="1">
+    <german>Die In-Group bewältigt die mimetische Rivalität durch den Sündenbockmechanismus.</german>
+    <english>The In-Group manages mimetic rivalry through the scapegoat mechanism.</english>
+  </proposition>
+  <proposition id="9.51" depth="2">
+    <german>Wenn innere Spannung (9.42) die Gruppe zu zerbrechen droht, wird sie kollektiv und unbewusst auf ein einzelnes Opfer (den Sündenbock) projiziert.</german>
+    <english>When internal tension (9.42) threatens to fragment the group, it is collectively and unconsciously projected onto a single victim (the scapegoat).</english>
+  </proposition>
+  <proposition id="9.52" depth="2">
+    <german>Der kollektive Ausschluss oder die Vernichtung des Sündenbocks tilgt die Rivalität und stellt den „fabrizierten Konsens“ wieder her.</german>
+    <english>The collective exclusion or destruction of the scapegoat purges the rivalry and restores &quot;fabricated consensus.&quot;</english>
+  </proposition>
+  <proposition id="9.53" depth="2">
+    <german>Diese „heilige Gewalt“ ist der ununtersuchte Schatten (7.13) am Fundament jeder sozialen Ordnung.</german>
+    <english>&quot;Sacred violence&quot; is the un-examined shadow (7.13) at the foundation of all social order.</english>
+  </proposition>
+  <proposition id="9.6" depth="1">
+    <german>Die Ausprägungen dieser Grammatik (9.0–9.5) wandeln sich je nach der wahrgenommenen Handlungsfähigkeit des Selbst.</german>
+    <english>The expressions of this grammar (9.0 - 9.5) evolve based on the perceived agency of the self.</english>
+  </proposition>
+  <proposition id="9.61" depth="2">
+    <german>Die beiden hauptsächlichen Ausprägungen sind der ererbte Stamm und der Marktstamm.</german>
+    <english>The two primary expressions are the Inherited Tribe and the Market Tribe.</english>
+  </proposition>
+  <proposition id="9.62" depth="2">
+    <german>Der Übergang vom ererbten Stamm zum Marktstamm erfolgt, wenn Handlungsfähigkeit eher zur Erzählung als zur Wirklichkeit wird.</german>
+    <english>The transition from Inherited Tribe to Market Tribe occurs when agency becomes a narrative rather than a reality.</english>
+  </proposition>
+  <proposition id="9.7" depth="1">
+    <german>Die Aufgabe des Humanus besteht nicht darin, dieser Grammatik zu entkommen; das ist unmöglich.</german>
+    <english>The task of the Humanus is not to escape this grammar; that is impossible.</english>
+  </proposition>
+  <proposition id="9.71" depth="2">
+    <german>Die Aufgabe besteht darin, diese Grammatik bewusst zu machen.</german>
+    <english>The task is to make this grammar conscious.</english>
+  </proposition>
+  <proposition id="9.72" depth="2">
+    <german>Den Mythos als Mythos, die Hierarchie als Konstrukt und den Sündenbock als unschuldig zu erkennen.</german>
+    <english>To recognize the myth as myth, the hierarchy as a construct, and the scapegoat as innocent.</english>
+  </proposition>
+  <proposition id="9.73" depth="2">
+    <german>Dieser Akt der Anerkennung (7.23) ist die einzige Grundlage für eine Ethik jenseits der heiligen Gewalt.</german>
+    <english>This act of recognition (7.23) is the only foundation for an ethics beyond sacred violence.</english>
+  </proposition>
+  <proposition id="9.74" depth="2">
+    <german>Die Grammatik bewusst zu machen heißt, vom ererbten Menschen in den geschaffenen Menschen überzutreten.</german>
+    <english>To make the grammar conscious is to step from the inherited human into the created human.</english>
+  </proposition>
+  <proposition id="10" depth="0">
+    <german>Variation 1: Der ererbte Stamm.</german>
+    <english>Variation 1: The Inherited Tribe.</english>
+  </proposition>
+  <proposition id="10.0" depth="1">
+    <german>Der ererbte Stamm ist die Grammatik der In-Group (9.0), unbewusst als Schicksal vollzogen.</german>
+    <english>The Inherited Tribe is the In-Group grammar (9.0) enacted unconsciously as fate.</english>
+  </proposition>
+  <proposition id="10.1" depth="1">
+    <german>Das Selbst wird in eine vorgegebene Erzählung (9.21) und Hierarchie (9.3) hineingeboren.</german>
+    <english>The self is born into a pre-defined narrative (9.21) and hierarchy (9.3).</english>
+  </proposition>
+  <proposition id="10.11" depth="2">
+    <german>„Zugehörigkeit“ geht der Wahl voraus; „Verantwortung“ wird geerbt, nicht ausgehandelt.</german>
+    <english>&quot;Belonging&quot; precedes choice; &quot;responsibility&quot; is inherited, not negotiated.</english>
+  </proposition>
+  <proposition id="10.2" depth="1">
+    <german>Die symbolische Kohärenz (9.2) des Stammes wird durch affektiven Zwang aufrechterhalten.</german>
+    <english>The symbolic coherence (9.2) of the tribe is maintained by affective coercion.</english>
+  </proposition>
+  <proposition id="10.21" depth="2">
+    <german>Dies erscheint als „gemeinsamer Boden“ oder „fabrizierter Konsens“ (9.52).</german>
+    <english>This appears as &quot;common ground&quot; or &quot;fabricated consensus&quot; (9.52).</english>
+  </proposition>
+  <proposition id="10.22" depth="2">
+    <german>Er bietet Kohärenz im Austausch für Gehorsam.</german>
+    <english>It offers coherence in exchange for obedience.</english>
+  </proposition>
+  <proposition id="10.3" depth="1">
+    <german>Schuldzuweisung ist das wichtigste Mittel zur Durchsetzung der ererbten Erzählung.</german>
+    <english>Blame is the primary tool for enforcing the inherited narrative.</english>
+  </proposition>
+  <proposition id="10.31" depth="2">
+    <german>Die Drohung ist das „emotionale Exil“, eine domestizierte Form des Sündenbockrituals (9.5).</german>
+    <english>The threat is &quot;emotional exile,&quot; a domesticated form of scapegoating (9.5).</english>
+  </proposition>
+  <proposition id="10.32" depth="2">
+    <german>Dies verwechselt Liebe mit Fügsamkeit.</german>
+    <english>This confuses love with compliance.</english>
+  </proposition>
+  <proposition id="10.4" depth="1">
+    <german>Der ethische Akt innerhalb dieses Stammes ist die „affektive Entflechtung“.</german>
+    <english>The ethical act within this tribe is &quot;affective disentanglement.&quot;</english>
+  </proposition>
+  <proposition id="10.41" depth="2">
+    <german>Die ererbte „affektive Infrastruktur“ (9.23) bewusst zu machen.</german>
+    <english>To make the inherited &quot;affective infrastructure&quot; (9.23) conscious.</english>
+  </proposition>
+  <proposition id="10.42" depth="2">
+    <german>„Zugehörigkeit“ von „Gehorsam“ zu trennen.</german>
+    <english>To separate &quot;belonging&quot; from &quot;obedience.&quot;</english>
+  </proposition>
+  <proposition id="10.43" depth="2">
+    <german>Den Anderen nicht als „Rolle“ in der eigenen Erzählung zu erkennen, sondern als Autor seiner eigenen.</german>
+    <english>To recognize the Other not as a &quot;role&quot; in one&#x27;s narrative, but as an author of their own.</english>
+  </proposition>
+  <proposition id="10.5" depth="1">
+    <german>Wahre Verantwortung wird nicht geerbt; sie wird miterschaffen.</german>
+    <english>True responsibility is not inherited; it is co-created.</english>
+  </proposition>
+  <proposition id="10.51" depth="2">
+    <german>Das ethische Gebot ist der Übergang von „ererbter Schuldzuweisung“ zu „dialogischem Einverständnis“.</german>
+    <english>The ethical imperative is to move from &quot;inherited blame&quot; to &quot;dialogic consent.&quot;</english>
+  </proposition>
+  <proposition id="10.52" depth="2">
+    <german>Den „fabrizierten Konsens“ (10.21) durch „geteilte Autorschaft“ zu ersetzen.</german>
+    <english>To replace &quot;fabricated consensus&quot; (10.21) with &quot;shared authorship.&quot;</english>
+  </proposition>
+  <proposition id="10.6" depth="1">
+    <german>Ethik ist die bewusste Aushandlung der Grammatik der Gruppe (9.0).</german>
+    <english>Ethics is the conscious negotiation of the group&#x27;s grammar (9.0).</english>
+  </proposition>
+  <proposition id="10.61" depth="2">
+    <german>Eine Welt zu schaffen, in der „affektive Souveränität“ und „geteilte Zugehörigkeit“ koexistieren können.</german>
+    <english>To create a world where &quot;affective sovereignty&quot; and &quot;shared belonging&quot; can co-exist.</english>
+  </proposition>
+  <proposition id="10.62" depth="2">
+    <german>Wovon der Stamm schwieg, davon müssen die Autoren nun sprechen.</german>
+    <english>Whereof the tribe was silent, thereof the authors must now speak.</english>
+  </proposition>
+  <proposition id="11" depth="0">
+    <german>Variation 2: Der Marktstamm.</german>
+    <english>Variation 2: The Market Tribe.</english>
+  </proposition>
+  <proposition id="11.0" depth="1">
+    <german>Der Marktstamm ist die Grammatik der In-Group (9.0), rationalisiert als Freiheit und Wahl.</german>
+    <english>The Market Tribe is the In-Group grammar (9.0) rationalized as freedom and choice.</english>
+  </proposition>
+  <proposition id="11.1" depth="1">
+    <german>Die In-Group wird nicht länger nur geerbt; sie wird „vermarktet“.</german>
+    <english>The In-Group is no longer solely inherited; it is &quot;marketed.&quot;</english>
+  </proposition>
+  <proposition id="11.11" depth="2">
+    <german>Identität, Zugehörigkeit (9.0) und Zweck (9.21) sind „symbolische Angebote“ auf diesem Markt.</german>
+    <english>Identity, belonging (9.0), and purpose (9.21) are &quot;symbolic offers&quot; in this market.</english>
+  </proposition>
+  <proposition id="11.12" depth="2">
+    <german>Dieser „unbewusste Tauschhandel“ ist die Logik des modernen Stammes.</german>
+    <english>This &quot;unconscious barter&quot; is the logic of the modern tribe.</english>
+  </proposition>
+  <proposition id="11.2" depth="1">
+    <german>Der „Opt-in“-Stamm schafft eine „verhandelte Gefangenschaft“.</german>
+    <english>The &quot;opt-in&quot; tribe creates &quot;negotiated captivity.&quot;</english>
+  </proposition>
+  <proposition id="11.21" depth="2">
+    <german>Die Entscheidung zum Beitritt verschleiert die Kosten der Zugehörigkeit.</german>
+    <english>The choice to join obscures the cost of belonging.</english>
+  </proposition>
+  <proposition id="11.22" depth="2">
+    <german>Die Kosten bestehen in der „freiwilligen Rollenkontraktion“—dem Verstummen des Selbst (7.53), um zur Avatarfigur zu passen.</german>
+    <english>The cost is &quot;voluntary role compression&quot;&mdash;the silencing of the self (7.53) to fit the avatar.</english>
+  </proposition>
+  <proposition id="11.3" depth="1">
+    <german>Im Opt-in-Stamm wird Verantwortung internalisiert, was die Bindung verstärkt.</german>
+    <english>In the opt-in tribe, responsibility is internalized, intensifying the bond.</english>
+  </proposition>
+  <proposition id="11.31" depth="2">
+    <german>Die „ererbte Schuldzuweisung“ (10.3) wird durch „internalisierte Selbstbeschuldigung“ ersetzt.</german>
+    <english>&quot;Inherited blame&quot; (10.3) is replaced by &quot;internalized self-blame.&quot;</english>
+  </proposition>
+  <proposition id="11.32" depth="2">
+    <german>Der Gedanke „Ich habe das gewählt“ verhindert die Entflechtung (10.4), die im ererbten Stamm möglich war.</german>
+    <english>The thought &quot;I chose this&quot; prevents the disentanglement (10.4) that was possible in the inherited tribe.</english>
+  </proposition>
+  <proposition id="11.33" depth="2">
+    <german>Die Angst vor dem Austritt ist nicht mehr nur das „emotionale Exil“ (10.31), sondern ein „Versagen des Urteils“.</german>
+    <english>Fear of exit is no longer just &quot;emotional exile&quot; (10.31), but a &quot;failure of judgment.&quot;</english>
+  </proposition>
+  <proposition id="11.4" depth="1">
+    <german>Diese „falsche Freiheit“ ist der Schatten (7.13) der modernen Gesellschaft.</german>
+    <english>This &quot;false freedom&quot; is the shadow (7.13) of modern society.</english>
+  </proposition>
+  <proposition id="11.41" depth="2">
+    <german>Die „Mythologie“ des Stammes (Parolen, Werte) ist der neue „fabrizierte Konsens“ (9.52).</german>
+    <english>The tribe&#x27;s &quot;mythology&quot; (slogans, values) is the new &quot;fabricated consensus&quot; (9.52).</english>
+  </proposition>
+  <proposition id="11.42" depth="2">
+    <german>Sie bietet „Gedankenlosigkeit“ als Erleichterung von der Angst vor der Freiheit an.</german>
+    <english>It offers &quot;thoughtlessness&quot; as a relief from the anxiety of freedom.</english>
+  </proposition>
+  <proposition id="11.5" depth="1">
+    <german>Der ethische Akt ist die „bewusste Zugehörigkeit“.</german>
+    <english>The ethical act is &quot;conscious affiliation.&quot;</english>
+  </proposition>
+  <proposition id="11.51" depth="2">
+    <german>Den Handel „klar zu sehen“. Den „unbewussten Tauschhandel“ (11.12) bewusst zu machen.</german>
+    <english>To &quot;see the trade clearly.&quot; To make the &quot;unconscious barter&quot; (11.12) conscious.</english>
+  </proposition>
+  <proposition id="11.52" depth="2">
+    <german>Zu fragen: „Welche Teile von mir werden in diesem Austausch zum Schweigen gebracht (7.01)?“</german>
+    <english>To ask: &quot;What parts of me are being silenced (7.01) in this exchange?&quot;</english>
+  </proposition>
+  <proposition id="11.53" depth="2">
+    <german>„Zugehörigkeit“ vom „stillen Opfer“ zu trennen.</german>
+    <english>To separate &quot;affiliation&quot; from &quot;silent sacrifice.&quot;</english>
+  </proposition>
+  <proposition id="11.7" depth="1">
+    <german>Das Ziel des Marktstammes ist nicht Autonomie, sondern wechselseitige Verwandlung.</german>
+    <english>The goal of the Market Tribe is not autonomy, but mutual transformation.</english>
+  </proposition>
+  <proposition id="11.71" depth="2">
+    <german>Eine Allianz ist nur dann ethisch, wenn sowohl Selbst als auch Stamm ohne Rüstung sprechen können.</german>
+    <english>An alliance is ethical only when both self and tribe can speak without armor.</english>
+  </proposition>
+
+</tractatus>
