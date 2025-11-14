@@ -5,6 +5,7 @@
 const API_BASE = '/api';
 const MAX_HISTORY = 20;
 const LAST_PROP_COOKIE = 'lastPropositionId';
+const CONFIG_COOKIE = 'tractatusConfig';
 
 // State
 let commandHistory = [];
@@ -123,15 +124,25 @@ function setupEventListeners() {
 }
 
 function loadInitialData() {
+    const cookieConfig = loadConfigFromCookie();
+    if (cookieConfig) {
+        displayConfig(cookieConfig);
+    }
+
     // Load config
     fetch(`${API_BASE}/config`)
-        .then(r => r.json())
-        .then(data => {
+        .then((r) => r.json())
+        .then((data) => {
             if (data.success) {
-                displayConfig(data.data);
+                const serverConfig = data.data || {};
+                const effectiveConfig = cookieConfig
+                    ? { ...serverConfig, ...cookieConfig }
+                    : serverConfig;
+                displayConfig(effectiveConfig);
+                saveConfigToCookie(effectiveConfig);
             }
         })
-        .catch(err => showError(`Failed to load config: ${err}`));
+        .catch((err) => showError(`Failed to load config: ${err}`));
 
     // Try to load a starting proposition
     const lastPropId = getCookie(LAST_PROP_COOKIE);
@@ -548,6 +559,9 @@ async function setConfigValue(key) {
 
         if (data.success) {
             showMessage(`Updated ${key} = ${value}`);
+            const existingConfig = loadConfigFromCookie() || {};
+            const updatedConfig = { ...existingConfig, [key]: value };
+            saveConfigToCookie(updatedConfig);
             loadInitialData(); // Reload config
         } else {
             showError(data.error);
@@ -718,6 +732,34 @@ function getCookie(name) {
         }
     }
     return null;
+}
+
+function loadConfigFromCookie() {
+    const raw = getCookie(CONFIG_COOKIE);
+    if (!raw) {
+        return null;
+    }
+    try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            return parsed;
+        }
+    } catch (err) {
+        console.warn('Failed to parse config cookie', err);
+    }
+    return null;
+}
+
+function saveConfigToCookie(config) {
+    if (!config || typeof config !== 'object') {
+        return;
+    }
+    try {
+        const serialized = JSON.stringify(config);
+        setCookie(CONFIG_COOKIE, serialized, 365);
+    } catch (err) {
+        console.warn('Failed to serialize config for cookie', err);
+    }
 }
 
 function appendAgentMessage(role, message, actionLabel, propositions = []) {
