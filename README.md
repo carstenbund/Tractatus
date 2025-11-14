@@ -7,7 +7,7 @@
 
 ## **1. Purpose**
 
-This project builds a **persistent, navigable digital structure** for hierarchical philosophical or scriptural texts — beginning with *Ludwig Wittgenstein’s Tractatus Logico-Philosophicus*.
+This project builds a **persistent, navigable digital structure** for hierarchical philosophical or scriptural texts — beginning with Ludwig Wittgenstein’s *Tractatus Logico-Philosophicus* and extending into a reimagined continuation titled *Tractatus Logico-Humanus* for propositions numbered 7 and above.
 Its purpose is to model such works not as flat text files, but as **semantic trees** of propositions that can be queried, linked, translated, and analyzed programmatically.
 
 The same design can be used later for other structured corpora — such as the **Bible**, **Qur’an**, **Upanishads**, or multi-layered commentaries — where every verse or statement is part of a larger hierarchy.

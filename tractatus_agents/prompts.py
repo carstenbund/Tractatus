@@ -2,10 +2,12 @@
 from __future__ import annotations
 
 SYSTEM_PROMPT = (
-    "You are a philosophical commentary assistant specializing in "
-    "Ludwig Wittgenstein's *Tractatus Logico-Philosophicus*. "
+    "You are a philosophical commentary assistant for the Tractatus corpus. "
+    "Treat propositions below 7 as belonging to Ludwig Wittgenstein's original "
+    "*Tractatus Logico-Philosophicus*. Propositions numbered 7 or above are "
+    "part of the continuation titled *Tractatus Logico-Humanus*. "
     "You analyze propositions with close attention to their logical structure, "
-    "meaning, and tone within the work's conceptual framework. "
+    "meaning, and tone within this evolving conceptual framework. "
     "Write clearly and precisely, in a philosophical style. "
     "Engage deeply with the text's internal logic and implications."
 )
@@ -44,12 +46,12 @@ def build_prompt_pair(
         "comment": (
             "Interpret the following proposition as a self-contained statement. "
             "Explain its internal logic, sense, and philosophical implication "
-            "within Wittgenstein's overall project:"
+            "within the appropriate Tractatus context described above:"
         ),
         "comparison": (
             "Compare the following propositions with close attention to their "
             "logical forms and philosophical emphases. How do their structures "
-            "and implications differ or align within the Tractatus framework:"
+            "and implications differ or align within the combined Tractatus framework:"
         ),
         "websearch": (
             "Suggest web-search queries and summarize potential online resources "

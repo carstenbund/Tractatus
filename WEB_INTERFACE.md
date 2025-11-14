@@ -1,6 +1,6 @@
 # Tractatus Web Interface
 
-A Flask-based web wrapper for the Tractatus CLI, providing an interactive REST API and beautiful web UI for exploring Wittgenstein's *Tractatus Logico-Philosophicus*.
+A Flask-based web wrapper for the Tractatus CLI, providing an interactive REST API and beautiful web UI for exploring the original *Tractatus Logico-Philosophicus* while seamlessly transitioning to the continuation *Tractatus Logico-Humanus* once you reach propositions numbered 7 or higher.
 
 ## Architecture
 
