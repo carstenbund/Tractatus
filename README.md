@@ -110,7 +110,14 @@ Each record receives a stable **numeric ID** that serves as an anchor for:
 ```bash
 python ingest.py        # builds the tractatus.db hierarchy from tractatus-raw.txt
 python main.py          # prints the structure from root down
+python translate_openai.py --lang en-gpt  # populate translations with OpenAI
 ```
+
+The `translate_openai.py` helper walks through every proposition in order,
+requests a translation from the OpenAI Chat Completions API, and persists the
+result as a `tractatus_translation` row linked through the ORM models. Use the
+`--lang`, `--model`, `--start-id`, and `--end-id` flags to control the target
+language, OpenAI model, and range of propositions processed.
 
 The ingestion process currently uses the German text embedded in
 `tractatus-raw.txt`. The raw source contains the complete bilingual edition,
