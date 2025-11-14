@@ -46,11 +46,57 @@ const TREE_LAYOUT = {
     minHeight: 280,
 };
 
+const THEME_DEFAULTS = {
+    primary: '#667eea',
+    contrast: '#ffffff',
+};
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     loadInitialData();
 });
+
+function getThemeColors() {
+    if (typeof window === 'undefined' || !document.body) {
+        return { ...THEME_DEFAULTS };
+    }
+
+    try {
+        const styles = window.getComputedStyle(document.body);
+        const primary = (styles.getPropertyValue('--color-primary') || '').trim() || THEME_DEFAULTS.primary;
+        const contrast =
+            (styles.getPropertyValue('--color-primary-contrast') || '').trim() || THEME_DEFAULTS.contrast;
+        return { primary, contrast };
+    } catch (err) {
+        return { ...THEME_DEFAULTS };
+    }
+}
+
+function hexToRgba(hex, alpha = 1) {
+    let normalized = (hex || '').trim();
+    if (!normalized) {
+        normalized = THEME_DEFAULTS.primary;
+    }
+
+    normalized = normalized.replace('#', '');
+    if (normalized.length === 3) {
+        normalized = normalized
+            .split('')
+            .map((char) => char + char)
+            .join('');
+    }
+
+    if (normalized.length !== 6 || Number.isNaN(parseInt(normalized, 16))) {
+        normalized = THEME_DEFAULTS.primary.replace('#', '');
+    }
+
+    const value = parseInt(normalized, 16);
+    const r = (value >> 16) & 255;
+    const g = (value >> 8) & 255;
+    const b = value & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 function setupEventListeners() {
     commandBtn.addEventListener('click', () => executeCommandFromInput());
@@ -510,7 +556,23 @@ async function setConfigValue(key) {
 /**
  * Display Functions
  */
+function updateThemeForProposition(prop) {
+    if (!document.body) {
+        return;
+    }
+
+    const name = prop && typeof prop.name === 'string' ? prop.name.trim() : '';
+    const topLevelNumber = name ? parseFloat(name) : NaN;
+
+    if (!Number.isNaN(topLevelNumber) && topLevelNumber > 7) {
+        document.body.classList.add('chapter-post-seven');
+    } else {
+        document.body.classList.remove('chapter-post-seven');
+    }
+}
+
 function displayProposition(prop) {
+    updateThemeForProposition(prop);
     currentName.textContent = prop.name || 'Unknown';
     currentText.textContent = prop.text || '';
     propId.textContent = `ID: ${prop.id}`;
@@ -729,12 +791,13 @@ function renderTreeCanvas() {
     collectTreeNodes(root);
 
     const ctx = canvas.ctx;
-    ctx.strokeStyle = '#c3cdf6';
+    const theme = getThemeColors();
+    ctx.strokeStyle = hexToRgba(theme.primary, 0.35);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
     drawTreeConnections(ctx, root);
 
-    drawTreeNodes(ctx, root);
+    drawTreeNodes(ctx, root, theme);
 }
 
 function prepareTreeCanvas(width, height) {
@@ -820,25 +883,27 @@ function drawTreeConnections(ctx, node) {
     });
 }
 
-function drawTreeNodes(ctx, node) {
+function drawTreeNodes(ctx, node, theme) {
     const isActive = activePropositionId === node.id;
     const radius = TREE_LAYOUT.nodeRadius;
+    const activeFill = (theme && theme.primary) || THEME_DEFAULTS.primary;
+    const activeText = (theme && theme.contrast) || THEME_DEFAULTS.contrast;
 
     ctx.beginPath();
-    ctx.fillStyle = isActive ? '#667eea' : '#ffffff';
-    ctx.strokeStyle = isActive ? '#667eea' : '#2f2f2f';
+    ctx.fillStyle = isActive ? activeFill : '#ffffff';
+    ctx.strokeStyle = isActive ? activeFill : '#2f2f2f';
     ctx.lineWidth = isActive ? 3 : 1.5;
     ctx.arc(node.screenX, node.screenY, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     ctx.font = isActive ? '600 13px "Segoe UI", sans-serif' : '12px "Segoe UI", sans-serif';
-    ctx.fillStyle = isActive ? '#ffffff' : '#333333';
+    ctx.fillStyle = isActive ? activeText : '#333333';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
     ctx.fillText(node.name, node.screenX, node.screenY - radius - 8);
 
-    node.children.forEach((child) => drawTreeNodes(ctx, child));
+    node.children.forEach((child) => drawTreeNodes(ctx, child, theme));
 }
 
 function handleTreeCanvasClick(event) {
