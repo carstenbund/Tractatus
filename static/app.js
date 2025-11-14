@@ -16,6 +16,7 @@ let activePropositionId = null;
 // DOM Elements
 const commandInput = document.getElementById('commandInput');
 const commandBtn = document.getElementById('commandBtn');
+const workTitle = document.getElementById('workTitle');
 const currentName = document.getElementById('currentName');
 const currentText = document.getElementById('currentText');
 const propId = document.getElementById('propId');
@@ -36,6 +37,9 @@ const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
 const commandHistoryEl = document.getElementById('commandHistory');
+
+const WORK_TITLE_ORIGINAL = 'Tractatus Logico-Philosophicus';
+const WORK_TITLE_CONTINUATION = 'Tractatus Logico-Humanus';
 
 const TREE_LAYOUT = {
     paddingX: 48,
@@ -556,15 +560,44 @@ async function setConfigValue(key) {
 /**
  * Display Functions
  */
+function isContinuationProposition(prop) {
+    if (!prop) {
+        return false;
+    }
+
+    const name = typeof prop.name === 'string' ? prop.name.trim() : '';
+    if (!name) {
+        return false;
+    }
+
+    const firstSegment = name.split(/[\s.]/)[0];
+    const topLevelNumber = parseFloat(firstSegment);
+
+    return !Number.isNaN(topLevelNumber) && topLevelNumber >= 7;
+}
+
+function updateWorkIdentity(prop) {
+    const isContinuation = isContinuationProposition(prop);
+    const workName = isContinuation ? WORK_TITLE_CONTINUATION : WORK_TITLE_ORIGINAL;
+
+    if (workTitle) {
+        workTitle.textContent = workName;
+    }
+
+    const suffix = ' - Interactive Web Interface';
+    if (typeof document !== 'undefined') {
+        document.title = `${workName}${suffix}`;
+    }
+}
+
 function updateThemeForProposition(prop) {
     if (!document.body) {
         return;
     }
 
-    const name = prop && typeof prop.name === 'string' ? prop.name.trim() : '';
-    const topLevelNumber = name ? parseFloat(name) : NaN;
+    const isContinuation = isContinuationProposition(prop);
 
-    if (!Number.isNaN(topLevelNumber) && topLevelNumber > 7) {
+    if (isContinuation) {
         document.body.classList.add('chapter-post-seven');
     } else {
         document.body.classList.remove('chapter-post-seven');
@@ -572,6 +605,7 @@ function updateThemeForProposition(prop) {
 }
 
 function displayProposition(prop) {
+    updateWorkIdentity(prop);
     updateThemeForProposition(prop);
     currentName.textContent = prop.name || 'Unknown';
     currentText.textContent = prop.text || '';
