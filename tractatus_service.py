@@ -286,24 +286,24 @@ class TractatusService:
 
         Args:
             prop: The proposition
-            language: Language code ("de" for German original, "en" for English translation)
+            language: Language code ("de" for German original, "en"/"fr"/"pt" for translations)
 
         Returns:
             The proposition text in the requested language, or German original if not found.
         """
-        lang = (language or self.config.get("lang")).lower()
+        lang = (language or self.config.get("lang") or "").lower()
 
         # German original - return main text
         if lang.startswith("de"):
             return prop.text
 
-        # English - find first English translation
-        if lang.startswith("en"):
-            for trans in prop.translations:
-                if trans.lang and trans.lang.lower().startswith("en"):
-                    return trans.text
-            # Fallback to German if no English translation
-            return prop.text
+        # Supported translations - find the first matching translation
+        for prefix in ("en", "fr", "pt"):
+            if lang.startswith(prefix):
+                for trans in prop.translations:
+                    if trans.lang and trans.lang.lower().startswith(prefix):
+                        return trans.text
+                return prop.text
 
         # Default to German for unknown languages
         return prop.text
