@@ -202,6 +202,38 @@ def api_translate():
     return jsonify({"success": True, "data": result})
 
 
+@app.route("/api/alternatives", methods=["GET"])
+def api_alternatives_list():
+    """Return alternative text variants for the active proposition."""
+
+    service = get_service()
+    result = service.alternatives()
+
+    if "error" in result:
+        return jsonify({"success": False, "error": result["error"]})
+
+    return jsonify({"success": True, "data": result})
+
+
+@app.route("/api/alternatives", methods=["POST"])
+def api_alternatives_create():
+    """Create a new alternative text variant for the active proposition."""
+
+    data = request.get_json() or {}
+    text_value = data.get("text", "")
+    lang = data.get("lang")
+    editor = data.get("editor")
+    tags = data.get("tags")
+
+    service = get_service()
+    result = service.create_alternative(text_value, lang=lang, editor=editor, tags=tags)
+
+    if "error" in result:
+        return jsonify({"success": False, "error": result["error"]})
+
+    return jsonify({"success": True, "data": result})
+
+
 @app.route("/api/agent", methods=["POST"])
 def api_agent():
     """Invoke LLM agent.

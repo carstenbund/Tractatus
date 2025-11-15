@@ -13,6 +13,7 @@ let currentLanguage = 'en';
 let currentTreeData = [];
 let treeLayoutNodes = [];
 let activePropositionId = null;
+let currentAlternatives = [];
 
 // DOM Elements
 const commandInput = document.getElementById('commandInput');
@@ -38,6 +39,13 @@ const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
 const commandHistoryEl = document.getElementById('commandHistory');
+const alternativesList = document.getElementById('alternativesList');
+const alternativeForm = document.getElementById('alternativeForm');
+const alternativeText = document.getElementById('alternativeText');
+const alternativeEditor = document.getElementById('alternativeEditor');
+const alternativeTags = document.getElementById('alternativeTags');
+const alternativeLang = document.getElementById('alternativeLang');
+const alternativeFeedback = document.getElementById('alternativeFeedback');
 
 const WORK_TITLE_ORIGINAL = 'Tractatus Logico-Philosophicus';
 const WORK_TITLE_CONTINUATION = 'Tractatus Logico-Humanus';
@@ -121,6 +129,10 @@ function setupEventListeners() {
     window.addEventListener('resize', () => {
         renderTreeCanvas();
     });
+
+    if (alternativeForm) {
+        alternativeForm.addEventListener('submit', handleAlternativeSubmit);
+    }
 }
 
 function loadInitialData() {
@@ -482,6 +494,102 @@ async function apiTranslate(lang) {
     }
 }
 
+async function loadAlternatives() {
+    if (!alternativesList) {
+        return;
+    }
+
+    if (!activePropositionId) {
+        currentAlternatives = [];
+        renderAlternatives([]);
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/alternatives`);
+        const data = await res.json();
+
+        if (data.success) {
+            const altPayload = data && data.data ? data.data.alternatives : null;
+            const variants = Array.isArray(altPayload)
+                ? altPayload
+                : [];
+            currentAlternatives = variants;
+            renderAlternatives(variants);
+            showAlternativeFeedback('', false);
+        } else {
+            showAlternativeFeedback(data.error || 'Unable to load alternatives.', true);
+            renderAlternatives([]);
+        }
+    } catch (err) {
+        showAlternativeFeedback(`Failed to load alternatives: ${err}`, true);
+        renderAlternatives([]);
+    }
+}
+
+async function handleAlternativeSubmit(event) {
+    event.preventDefault();
+
+    if (!activePropositionId) {
+        showAlternativeFeedback('Load a proposition before saving alternatives.', true);
+        return;
+    }
+
+    if (!alternativeText) {
+        return;
+    }
+
+    const textValue = alternativeText.value.trim();
+    const editorValue = alternativeEditor ? alternativeEditor.value.trim() : '';
+    const tagValue = alternativeTags ? alternativeTags.value.trim() : '';
+    const langValue = (alternativeLang && alternativeLang.value.trim()) || currentLanguage || 'en';
+
+    if (!textValue) {
+        showAlternativeFeedback('Please enter alternative text before saving.', true);
+        return;
+    }
+
+    const payload = {
+        text: textValue,
+        lang: langValue,
+        editor: editorValue || undefined,
+        tags: tagValue,
+    };
+
+    try {
+        const res = await fetch(`${API_BASE}/alternatives`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            showAlternativeFeedback('Alternative saved successfully.', false);
+            if (alternativeText) {
+                alternativeText.value = '';
+            }
+            if (alternativeTags) {
+                alternativeTags.value = '';
+            }
+            if (
+                alternativeLang &&
+                data &&
+                data.data &&
+                data.data.alternative &&
+                data.data.alternative.lang
+            ) {
+                alternativeLang.value = data.data.alternative.lang;
+            }
+            await loadAlternatives();
+        } else {
+            showAlternativeFeedback(data.error || 'Failed to save alternative.', true);
+        }
+    } catch (err) {
+        showAlternativeFeedback(`Failed to save alternative: ${err}`, true);
+    }
+}
+
 async function apiAgent(action, targets, userInput) {
     try {
         // Clear previous response and show spinner
@@ -633,6 +741,8 @@ function displayProposition(prop) {
         setCookie(LAST_PROP_COOKIE, prop.id, 365);
     }
     renderTreeCanvas();
+    resetAlternativeForm();
+    loadAlternatives();
 }
 
 function displayChildren(children) {
@@ -684,6 +794,54 @@ function displaySearchResults(results) {
         </div>`
         )
         .join('');
+}
+
+function renderAlternatives(alternatives) {
+    if (!alternativesList) {
+        return;
+    }
+
+    if (!alternatives || alternatives.length === 0) {
+        alternativesList.innerHTML = '<p class="alternative-empty">No alternatives have been saved yet.</p>';
+        return;
+    }
+
+    const items = alternatives
+        .map((alt, index) => {
+            const metaParts = [];
+            if (alt.editor) {
+                metaParts.push(`by ${escapeHtml(alt.editor)}`);
+            }
+            if (alt.lang) {
+                metaParts.push(`lang: ${escapeHtml(alt.lang)}`);
+            }
+            if (alt.updated_at || alt.created_at) {
+                metaParts.push(formatAlternativeTimestamp(alt.updated_at || alt.created_at));
+            }
+
+            const tagChips = Array.isArray(alt.tags) && alt.tags.length
+                ? `<div class="alternative-tags">${alt.tags
+                      .map((tag) => `<span class="alternative-tag">#${escapeHtml(tag)}</span>`)
+                      .join('')}</div>`
+                : '';
+
+            const heading = `Alternative ${index + 1}`;
+            const body = escapeHtml(alt.text || '').replace(/\n/g, '<br />');
+
+            return `
+                <article class="alternative-card">
+                    <header>
+                        <h4>${heading}</h4>
+                        <div class="alternative-meta">${metaParts.join(' • ')}</div>
+                    </header>
+                    <div class="alternative-text">${body}</div>
+                    ${tagChips}
+                </article>
+            `;
+        })
+        .join('');
+
+    alternativesList.innerHTML = items;
 }
 
 function displayTranslations(translations) {
@@ -1132,6 +1290,72 @@ function showError(msg) {
     setTimeout(() => {
         errorBox.classList.remove('show');
     }, 5000);
+}
+
+function resetAlternativeForm() {
+    if (!alternativeForm) {
+        return;
+    }
+
+    if (alternativeText) {
+        alternativeText.value = '';
+    }
+    if (alternativeTags) {
+        alternativeTags.value = '';
+    }
+    if (alternativeLang) {
+        const lang = currentLanguage || 'en';
+        alternativeLang.value = lang;
+    }
+    showAlternativeFeedback('', false);
+}
+
+function showAlternativeFeedback(message, isError = false) {
+    if (!alternativeFeedback) {
+        return;
+    }
+
+    alternativeFeedback.textContent = message || '';
+    if (!message) {
+        alternativeFeedback.classList.remove('error', 'success');
+        return;
+    }
+
+    if (isError) {
+        alternativeFeedback.classList.add('error');
+        alternativeFeedback.classList.remove('success');
+    } else {
+        alternativeFeedback.classList.add('success');
+        alternativeFeedback.classList.remove('error');
+    }
+}
+
+function formatAlternativeTimestamp(timestamp) {
+    if (!timestamp) {
+        return '';
+    }
+
+    try {
+        const date = new Date(timestamp);
+        if (!Number.isNaN(date.getTime())) {
+            return date.toLocaleString();
+        }
+    } catch (err) {
+        // Fallback to raw value
+    }
+    return typeof timestamp === 'string' ? timestamp : '';
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 
 function addToHistory(command) {

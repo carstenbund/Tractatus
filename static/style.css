@@ -31,6 +31,120 @@ body.chapter-post-seven {
   border: 0;
 }
 
+.alternatives-list {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.alternative-card {
+  background: #f9fafb;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.alternative-card header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.alternative-card h4 {
+  margin: 0;
+  font-size: 1.05em;
+  color: var(--color-primary);
+}
+
+.alternative-meta {
+  font-size: 0.85em;
+  color: #475569;
+}
+
+.alternative-text {
+  color: #1f2937;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.alternative-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.alternative-tag {
+  background: rgba(var(--color-primary-rgb), 0.12);
+  color: var(--color-primary);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.75em;
+  letter-spacing: 0.02em;
+}
+
+.alternative-editor {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.alternative-editor h4 {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+#alternativeText {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  border: 1px solid #cbd5f5;
+  border-radius: 6px;
+  font-family: inherit;
+  margin-bottom: 12px;
+}
+
+.alternative-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.alternative-form-grid label {
+  display: block;
+  font-size: 0.85em;
+  color: #475569;
+  margin-bottom: 4px;
+}
+
+.alternative-form-grid input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #cbd5f5;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.alternative-feedback {
+  margin-top: 8px;
+  font-size: 0.85em;
+  min-height: 1.2em;
+}
+
+.alternative-feedback.error {
+  color: #b91c1c;
+}
+
+.alternative-feedback.success {
+  color: #047857;
+}
+
 /* ==========================================
    MOBILE (320px - 480px)
    ========================================== */
