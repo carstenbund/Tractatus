@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, Integer, String, Text
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -56,6 +58,17 @@ class Translation(Base):
     text: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[str | None] = mapped_column(String, nullable=True)
     tractatus_id: Mapped[int | None] = mapped_column(ForeignKey("tractatus.id"))
+    variant_type: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="translation", server_default="translation"
+    )
+    editor: Mapped[str | None] = mapped_column(String, nullable=True)
+    tags: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
+    )
 
     proposition: Mapped[Proposition] = relationship("Proposition", back_populates="translations")
 

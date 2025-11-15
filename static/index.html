@@ -63,6 +63,7 @@
                     <button type="button" class="tab-btn" data-tab="tree" onclick="switchTab('tree', event)">Tree</button>
                     <button type="button" class="tab-btn" data-tab="search" onclick="switchTab('search', event)">Search</button>
                     <button type="button" class="tab-btn" data-tab="agent" onclick="switchTab('agent', event)">AI Analysis</button>
+                    <button type="button" class="tab-btn" data-tab="alternatives" onclick="switchTab('alternatives', event)">Alternatives</button>
                     <button type="button" class="tab-btn" data-tab="config" onclick="switchTab('config', event)">Settings</button>
                 </div>
 
@@ -132,6 +133,35 @@
                         <p>Analyzing propositions...</p>
                     </div>
                     <div id="agentResponse" class="agent-response"></div>
+                </div>
+
+                <!-- Alternatives Tab -->
+                <div id="alternatives-tab" class="tab-content">
+                    <h3>Alternative Texts</h3>
+                    <div id="alternativesList" class="alternatives-list" aria-live="polite"></div>
+                    <div class="alternative-editor">
+                        <h4>Create or Edit Alternative</h4>
+                        <form id="alternativeForm">
+                            <label for="alternativeText" class="sr-only">Alternative text</label>
+                            <textarea id="alternativeText" rows="6" placeholder="Draft an alternative version of the proposition..."></textarea>
+                            <div class="alternative-form-grid">
+                                <div>
+                                    <label for="alternativeEditor">Editor</label>
+                                    <input type="text" id="alternativeEditor" placeholder="Your name or initials" />
+                                </div>
+                                <div>
+                                    <label for="alternativeTags">Tags</label>
+                                    <input type="text" id="alternativeTags" placeholder="Comma separated tags" />
+                                </div>
+                                <div>
+                                    <label for="alternativeLang">Language</label>
+                                    <input type="text" id="alternativeLang" placeholder="en" value="en" maxlength="5" />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save Alternative</button>
+                            <p id="alternativeFeedback" class="alternative-feedback" role="status" aria-live="polite"></p>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- Settings Tab -->

@@ -1,6 +1,8 @@
 """Service layer for Tractatus CLI operations - shared by CLI and Flask."""
 from __future__ import annotations
 
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -169,6 +171,12 @@ class TractatusService:
         if not self.current:
             return {"error": "No current node."}
 
+        translations = [
+            t
+            for t in self.current.translations
+            if (t.variant_type or "translation") != "alternative"
+        ]
+
         return {
             "proposition": self._proposition_to_dict(self.current),
             "translations": [
@@ -177,7 +185,7 @@ class TractatusService:
                     "text": t.text,
                     "source": t.source or "unknown",
                 }
-                for t in self.current.translations
+                for t in translations
             ],
         }
 
@@ -204,6 +212,78 @@ class TractatusService:
                 },
             }
         return {"error": f"No translation found for language: {lang}"}
+
+    def alternatives(self) -> dict | None:
+        """Return alternative text variants for the current proposition."""
+
+        if not self.current:
+            return {"error": "No current node."}
+
+        alternatives = [
+            {
+                "id": alt.id,
+                "lang": alt.lang,
+                "text": alt.text,
+                "editor": alt.editor or "",
+                "tags": self._split_tags(alt.tags),
+                "created_at": self._format_timestamp(alt.created_at),
+                "updated_at": self._format_timestamp(alt.updated_at),
+            }
+            for alt in sorted(
+                (t for t in self.current.translations if t.variant_type == "alternative"),
+                key=lambda entry: entry.created_at or datetime.min,
+            )
+        ]
+
+        return {
+            "proposition": self._proposition_to_dict(self.current),
+            "alternatives": alternatives,
+        }
+
+    def create_alternative(
+        self,
+        text: str,
+        *,
+        lang: str | None = None,
+        editor: str | None = None,
+        tags: list[str] | str | None = None,
+    ) -> dict | None:
+        """Create a new alternative translation for the current proposition."""
+
+        if not self.current:
+            return {"error": "No current node."}
+
+        cleaned_text = (text or "").strip()
+        if not cleaned_text:
+            return {"error": "Alternative text is required."}
+
+        default_lang = (lang or self.config.get("lang") or "en").strip() or "en"
+
+        translation = Translation(
+            lang=default_lang.lower(),
+            text=cleaned_text,
+            source="user",  # Flag as user-provided
+            variant_type="alternative",
+            editor=(editor or "").strip() or None,
+            tags=self._serialise_tags(tags),
+        )
+        translation.proposition = self.current
+        self.session.add(translation)
+        self.session.commit()
+        self.session.refresh(translation)
+
+        return {
+            "proposition": self._proposition_to_dict(self.current),
+            "alternative": {
+                "id": translation.id,
+                "lang": translation.lang,
+                "text": translation.text,
+                "editor": translation.editor or "",
+                "tags": self._split_tags(translation.tags),
+                "created_at": self._format_timestamp(translation.created_at),
+                "updated_at": self._format_timestamp(translation.updated_at),
+            },
+        }
 
     def agent(
         self,
@@ -333,6 +413,41 @@ class TractatusService:
             "level": prop.level,
             "language": lang.lower()[:2],  # Return the language used
         }
+
+    @staticmethod
+    def _serialise_tags(tags: list[str] | str | None) -> str | None:
+        """Normalise tag input to a comma-separated string."""
+
+        if tags is None:
+            return None
+
+        if isinstance(tags, str):
+            raw_items = tags.split(",")
+        else:
+            raw_items = list(tags)
+
+        cleaned = [item.strip() for item in raw_items if item and item.strip()]
+        if not cleaned:
+            return None
+        unique = list(dict.fromkeys(cleaned).keys())
+        return ",".join(unique)
+
+    @staticmethod
+    def _split_tags(tags: str | None) -> list[str]:
+        if not tags:
+            return []
+        return [item.strip() for item in tags.split(",") if item.strip()]
+
+    @staticmethod
+    def _format_timestamp(value: datetime | None) -> str | None:
+        if not value:
+            return None
+        if isinstance(value, datetime):
+            return value.isoformat()
+        try:
+            return str(value)
+        except Exception:
+            return None
 
     def _render_tree_data(
         self,
