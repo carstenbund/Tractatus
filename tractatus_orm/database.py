@@ -37,13 +37,20 @@ def _ensure_translation_extensions() -> None:
         statements.append(
             "ALTER TABLE tractatus_translation ADD COLUMN tags TEXT"
         )
+    updates: list[str] = []
     if "created_at" not in columns:
         statements.append(
-            "ALTER TABLE tractatus_translation ADD COLUMN created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+            "ALTER TABLE tractatus_translation ADD COLUMN created_at DATETIME"
+        )
+        updates.append(
+            "UPDATE tractatus_translation SET created_at = CURRENT_TIMESTAMP WHERE created_at IS NULL"
         )
     if "updated_at" not in columns:
         statements.append(
-            "ALTER TABLE tractatus_translation ADD COLUMN updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+            "ALTER TABLE tractatus_translation ADD COLUMN updated_at DATETIME"
+        )
+        updates.append(
+            "UPDATE tractatus_translation SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL"
         )
 
     if not statements:
@@ -51,4 +58,6 @@ def _ensure_translation_extensions() -> None:
 
     with engine.begin() as conn:
         for stmt in statements:
+            conn.execute(text(stmt))
+        for stmt in updates:
             conn.execute(text(stmt))
