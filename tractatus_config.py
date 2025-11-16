@@ -26,6 +26,7 @@ class TrcliConfig:
 
     def load(self) -> None:
         """Load preferences from .trclirc file if it exists."""
+        self.preferences = self.DEFAULT_PREFERENCES.copy()
         if self.config_file.exists():
             try:
                 with open(self.config_file, "r") as f:
