@@ -1,4 +1,24 @@
-"""Service layer for Tractatus CLI operations - shared by CLI and Flask."""
+"""Service layer for Tractatus CLI operations - shared by CLI and Flask.
+
+This module provides the core business logic for navigating and interacting with
+Wittgenstein's Tractatus Logico-Philosophicus. It abstracts database operations
+and provides a clean API for both command-line and web interfaces.
+
+Key Features:
+    - Hierarchical navigation (get, parent, next, previous, children)
+    - Tree and list views of proposition relationships
+    - Full-text search across propositions
+    - Multilingual translation support
+    - Alternative text versions with metadata
+    - AI-powered analysis using LLM agents
+    - Language-aware text retrieval
+    - Protection against cyclic data relationships
+
+Architecture:
+    The service maintains navigation state (current proposition) and delegates
+    to SQLAlchemy ORM for database access and AgentRouter for AI operations.
+    Configuration is managed by TrcliConfig, which persists user preferences.
+"""
 from __future__ import annotations
 
 from datetime import datetime
@@ -13,13 +33,30 @@ from tractatus_orm.models import Proposition, Translation
 
 
 class TractatusService:
-    """Business logic service for Tractatus operations."""
+    """Core business logic service for Tractatus operations.
+
+    This class provides a stateful API for navigating the hierarchical structure
+    of the Tractatus, with support for translations, search, and AI analysis.
+    It maintains a "current proposition" that serves as the navigation context.
+
+    Attributes:
+        session: SQLAlchemy database session for ORM queries
+        config: User configuration with preferences (language, display settings)
+        current: Currently selected proposition (navigation context)
+    """
 
     def __init__(self, session: Session, config: TrcliConfig | None = None):
-        """Initialize service with database session and config."""
+        """Initialize service with database session and configuration.
+
+        Args:
+            session: SQLAlchemy database session for ORM queries
+            config: Optional user configuration (defaults to TrcliConfig())
+        """
         self.session = session
         self.config = config or TrcliConfig()
+        # Current proposition serves as navigation context for operations
         self.current: Proposition | None = None
+        # Agent router is lazy-loaded on first use to avoid unnecessary initialization
         self._agent_router: AgentRouter | None = None
         self._agent_router_tokens: int | None = None
         self._config_mtime: float | None = self._config_file_mtime()
@@ -33,6 +70,10 @@ class TractatusService:
             self._agent_router is None
             or self._agent_router_tokens != current_max_tokens
         ):
+            print(
+                "[TractatusService] configuring agent router with "
+                f"max_tokens={current_max_tokens}"
+            )
             self._agent_router = self._configure_agent_router(
                 max_tokens=current_max_tokens
             )
@@ -40,8 +81,29 @@ class TractatusService:
         return self._agent_router
 
     def get(self, key: str) -> dict | None:
-        """Navigate to proposition by name or id. Returns proposition data or None."""
-        # --- explicit id override ---
+        """Navigate to a proposition by name or database ID.
+
+        This is the primary navigation method. It accepts proposition names
+        like "1", "1.1", "2.0121" or explicit database IDs like "id:42".
+        Sets the found proposition as the current navigation context.
+
+        Resolution order:
+        1. If key starts with "id:", use database ID lookup
+        2. Try matching by proposition name (e.g., "1.1")
+        3. If key is all digits, fall back to database ID lookup
+
+        Args:
+            key: Proposition name (e.g., "1.1") or database ID (e.g., "id:42")
+
+        Returns:
+            Dictionary with proposition data, or error dict if not found
+
+        Examples:
+            get("1.1") -> finds proposition named "1.1"
+            get("id:42") -> finds proposition with database ID 42
+            get("100") -> tries name first, then database ID 100
+        """
+        # --- explicit id override using "id:" prefix ---
         if key.startswith("id:"):
             try:
                 value = int(key.removeprefix("id:"))
@@ -53,7 +115,7 @@ class TractatusService:
             self.current = chosen
             return self._proposition_to_dict(chosen)
 
-        # --- name-first resolution ---
+        # --- name-first resolution for hierarchical addresses ---
         name_hit = self.session.scalars(
             select(Proposition).where(Proposition.name == key)
         ).first()
@@ -62,7 +124,7 @@ class TractatusService:
             self.current = name_hit
             return self._proposition_to_dict(name_hit)
 
-        # fallback: id lookup only if name not found
+        # fallback: id lookup only if name not found and key is numeric
         if key.isdigit():
             id_hit = self.session.get(Proposition, int(key))
             if id_hit:
@@ -302,14 +364,46 @@ class TractatusService:
         language: str | None = None,
         user_input: str | None = None,
     ) -> dict | None:
-        """Invoke LLM agent on propositions.
+        """Invoke an LLM agent to analyze propositions using AI.
+
+        This method provides AI-powered analysis of philosophical texts using
+        OpenAI's GPT models. It supports multiple analysis types and can work
+        with text in different languages.
+
+        Supported actions:
+            - comment: Generate philosophical commentary on a single proposition
+            - comparison: Compare and analyze relationships between multiple propositions
+            - websearch: Search web for related context (future feature)
+            - reference: Find and analyze related propositions (future feature)
+
+        The agent uses language-aware text retrieval to provide analysis in the
+        requested language, pulling from translations when available.
 
         Args:
             action: The agent action (comment, comparison, websearch, reference)
-            targets: Optional list of proposition names to analyze
+            targets: Optional list of proposition names to analyze (e.g., ["1.1", "1.2"])
+                    If not provided, uses the current proposition
             language: Optional language code ("de" for German, "en" for English)
-            user_input: Optional user-supplied prompt to include with the request
+                     Defaults to user's configured language preference
+            user_input: Optional user-supplied prompt to guide the analysis
+                       This is included alongside the proposition text
+
+        Returns:
+            Dictionary with:
+                - action: The action performed
+                - propositions: List of analyzed propositions
+                - content: AI-generated analysis text
+                - user_input: The user prompt (if provided)
+                - cached: Whether the response came from cache
+
+        Examples:
+            agent("comment", targets=["1.1"], language="en")
+            -> Generates English commentary on proposition 1.1
+
+            agent("comparison", targets=["1", "2"], user_input="Compare main themes")
+            -> Compares propositions 1 and 2 with custom prompt
         """
+        # Parse and validate the action string
         try:
             action_enum = AgentAction.from_cli_token(action)
         except ValueError:
@@ -317,21 +411,22 @@ class TractatusService:
                 "error": f"Unknown action: {action}. Expected one of: comment, comparison, websearch, reference"
             }
 
-        # Resolve target propositions
+        # Resolve target propositions from their names
         if targets:
             propositions = self._resolve_targets(targets)
             if not propositions:
                 return {"error": f"No propositions found for targets: {targets}"}
         elif self.current:
+            # If no targets specified, use the current navigation context
             propositions = [self.current]
         else:
             return {"error": "No target propositions specified and no current node."}
 
-        # Build payload in selected language
+        # Build text payload in the requested language
         lang = language or self.config.get("lang")
         payload = self._build_agent_payload(propositions, language=lang)
 
-        # Get response from agent
+        # Invoke the LLM agent through the router
         response = self.agent_router.perform(
             action_enum,
             propositions,
@@ -340,6 +435,7 @@ class TractatusService:
             user_input=user_input,
         )
 
+        # Return structured response with analysis
         return {
             "action": response.action,
             "propositions": [self._proposition_to_dict(p, language=lang) for p in propositions],
@@ -516,14 +612,42 @@ class TractatusService:
     def _configure_agent_router(
         self, max_tokens: int | None = None
     ) -> AgentRouter:
-        """Create agent router with LLM backend."""
+        """Create agent router with LLM backend.
+
+        Attempts to initialize LLM clients in the following priority order:
+        1. Anthropic Claude (if ANTHROPIC_API_KEY is set)
+        2. OpenAI GPT (if OPENAI_API_KEY is set)
+        3. Echo client (fallback when no API keys are configured)
+
+        The first successfully initialized client is used. This allows users
+        to choose their preferred LLM provider via environment variables.
+
+        Args:
+            max_tokens: Optional token limit override (uses config default if not provided)
+
+        Returns:
+            AgentRouter configured with the best available LLM client
+        """
         client = None
+
+        # Try Anthropic Claude first (preferred for philosophical analysis)
         try:
-            from tractatus_agents.llm_openai import OpenAILLMClient
-            client = OpenAILLMClient()
+            from tractatus_agents.llm_anthropic import AnthropicLLMClient
+            client = AnthropicLLMClient()
         except (ImportError, RuntimeError, Exception):
+            # Anthropic not available, try OpenAI
             pass
 
+        # Fallback to OpenAI if Anthropic not available
+        if client is None:
+            try:
+                from tractatus_agents.llm_openai import OpenAILLMClient
+                client = OpenAILLMClient()
+            except (ImportError, RuntimeError, Exception):
+                # OpenAI not available, will use Echo client
+                pass
+
+        # Get configured max_tokens (defaults to 2000 in config)
         tokens = (
             self.config.get("llm_max_tokens")
             if max_tokens is None
