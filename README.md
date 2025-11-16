@@ -161,6 +161,38 @@ You can also combine navigation and LLM calls inline with prefixes such as
 If no OpenAI credentials are configured the CLI falls back to an echo agent,
 so the command structure can be explored without an external dependency.
 
+### Switching LLM Backends
+
+Tractatus ships with multiple LLM clients and automatically picks the first
+available option when the CLI or web server starts:
+
+1. **Anthropic Claude** (`ANTHROPIC_API_KEY`)
+2. **OpenAI GPT** (`OPENAI_API_KEY`)
+3. **Ollama** (auto-detects a running Ollama daemon)
+4. **Echo client** (placeholder when no LLM provider can be reached)
+
+To switch providers, simply configure the relevant environment variable (or
+run Ollama locally) *before* launching `python trcli.py` or `python app.py`.
+For example:
+
+```bash
+# Use Anthropic Claude
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Switch to OpenAI GPT
+unset ANTHROPIC_API_KEY
+export OPENAI_API_KEY="sk-..."
+
+# Try a local model with Ollama
+unset OPENAI_API_KEY
+ollama pull llama3.2 && ollama serve
+```
+
+The application will rebuild its agent router automatically whenever you
+change the configuration file or restart the process, so you can experiment
+with different providers without code changes. See `LLM_SETUP.md` for a deeper
+guide (model lists, troubleshooting, cost comparisons, etc.).
+
 ### Web Interface
 
 For a more visual, browser-based experience, use the **Flask web wrapper**:
