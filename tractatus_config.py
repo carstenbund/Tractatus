@@ -36,7 +36,7 @@ class TrcliConfig:
         display_length (int): Maximum characters to display in text snippets (1-1000)
         lines_per_output (int): Maximum lines for list/tree output (1-1000)
         lang (str): Default language code for translations ("de", "en", "fr", "pt")
-        llm_max_tokens (int): Maximum tokens for LLM responses (10-4000)
+        llm_max_tokens (int): Maximum tokens for LLM responses (100-8000, default 2000)
         tree_max_depth (int): Maximum depth for tree traversal (0=unlimited, 1-12)
 
     Attributes:
@@ -49,7 +49,7 @@ class TrcliConfig:
         "display_length": 60,      # Characters to show in text previews
         "lines_per_output": 10,    # Max lines for list/tree commands
         "lang": "en",              # Default language (de=German, en=English, etc.)
-        "llm_max_tokens": 500,     # Token budget for AI responses
+        "llm_max_tokens": 2000,    # Token budget for AI responses (increased for quality analysis)
         "tree_max_depth": 0,       # Tree depth limit (0=unlimited)
     }
 
@@ -177,7 +177,7 @@ class TrcliConfig:
             - display_length: int, 1-1000 characters
             - lines_per_output: int, 1-1000 lines
             - lang: str, any value (no validation)
-            - llm_max_tokens: int, 10-4000 tokens
+            - llm_max_tokens: int, 100-8000 tokens (increased range for quality analysis)
             - tree_max_depth: int, 0-12 levels (0=unlimited)
 
         Example:
@@ -207,8 +207,9 @@ class TrcliConfig:
             if not (1 <= value <= 1000):
                 return False, "lines_per_output must be between 1 and 1000"
         elif key == "llm_max_tokens":
-            if not (10 <= value <= 4000):
-                return False, "llm_max_tokens must be between 10 and 4000"
+            # Increased range to support longer, more complete responses
+            if not (100 <= value <= 8000):
+                return False, "llm_max_tokens must be between 100 and 8000"
         elif key == "tree_max_depth":
             if not (0 <= value <= 12):
                 return False, "tree_max_depth must be between 0 and 12"
