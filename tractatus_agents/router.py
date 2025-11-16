@@ -31,12 +31,14 @@ class AgentAction(str, Enum):
     Actions:
         COMMENT: Generate philosophical commentary on a single proposition
         COMPARISON: Compare and analyze relationships between multiple propositions
+        SYNTHESIZE: Synthesize multiple propositions into a unified analysis
         WEBSEARCH: Search the web for related context (future feature)
         REFERENCE: Find and analyze references to related propositions (future feature)
     """
 
     COMMENT = "comment"
     COMPARISON = "comparison"
+    SYNTHESIZE = "synthesize"
     WEBSEARCH = "websearch"
     REFERENCE = "reference"
 
@@ -172,6 +174,8 @@ class AgentRouter:
             return self._llm_agent.comment(payload, language=language, user_input=user_input)
         if action is AgentAction.COMPARISON:
             return self._llm_agent.compare(payload, language=language, user_input=user_input)
+        if action is AgentAction.SYNTHESIZE:
+            return self._llm_agent.synthesize(payload, language=language, user_input=user_input)
         if action is AgentAction.WEBSEARCH:
             return self._llm_agent.websearch(payload, language=language, user_input=user_input)
         if action is AgentAction.REFERENCE:

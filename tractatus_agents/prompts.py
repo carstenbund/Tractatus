@@ -53,6 +53,13 @@ def build_prompt_pair(
             "logical forms and philosophical emphases. How do their structures "
             "and implications differ or align within the combined Tractatus framework:"
         ),
+        "synthesize": (
+            "Analyze the following collection of propositions as a cohesive unit. "
+            "Identify the overarching themes, hierarchical relationships, and logical "
+            "structure that connects them. Extract the unified philosophical vector "
+            "of meaning that emerges from this complex of statements, treating them "
+            "as parts of a larger argumentative or conceptual whole:"
+        ),
         "websearch": (
             "Suggest web-search queries and summarize potential online resources "
             "that provide historical, biographical, or interpretive context for "
