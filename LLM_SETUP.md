@@ -1,19 +1,20 @@
 # LLM Setup Guide
 
-This document explains how to configure AI-powered philosophical analysis for the Tractatus application using either Anthropic Claude or OpenAI GPT models.
+This document explains how to configure AI-powered philosophical analysis for the Tractatus application using Anthropic Claude, OpenAI GPT, or Ollama (local models).
 
 ## Overview
 
-The Tractatus application supports two LLM providers for AI-powered commentary and analysis:
+The Tractatus application supports three LLM providers for AI-powered commentary and analysis:
 
-1. **Anthropic Claude** (Recommended) - Advanced reasoning capabilities ideal for philosophical analysis
-2. **OpenAI GPT** - Cost-effective alternative with good performance
+1. **Anthropic Claude** (Best Quality) - Advanced reasoning capabilities ideal for philosophical analysis
+2. **OpenAI GPT** (Good Quality) - Cost-effective cloud alternative with good performance
+3. **Ollama** (Free & Local) - Run open-source models locally without API keys or usage costs
 
-The application automatically selects the available provider based on environment variables, with Anthropic taking priority if both are configured.
+The application automatically selects the available provider based on environment variables and local services, with priority given to cloud providers for quality.
 
 ## Quick Start
 
-### Option 1: Using Anthropic Claude (Recommended)
+### Option 1: Using Anthropic Claude (Recommended for Quality)
 
 ```bash
 # Set your Anthropic API key
@@ -37,13 +38,31 @@ python app.py
 python trcli.py
 ```
 
+### Option 3: Using Ollama (Free, Local, No API Key)
+
+```bash
+# Install Ollama from https://ollama.ai
+
+# Pull a model (one-time setup)
+ollama pull llama3.2
+
+# Start Ollama server (if not already running)
+ollama serve
+
+# Start the application (no API key needed!)
+python app.py
+# or
+python trcli.py
+```
+
 ## Provider Selection Priority
 
 The application tries to initialize LLM clients in this order:
 
-1. **Anthropic Claude** - If `ANTHROPIC_API_KEY` is set
-2. **OpenAI GPT** - If `OPENAI_API_KEY` is set
-3. **Echo Client** - Fallback when no API keys are configured (for testing)
+1. **Anthropic Claude** - If `ANTHROPIC_API_KEY` is set (best quality)
+2. **OpenAI GPT** - If `OPENAI_API_KEY` is set (good quality)
+3. **Ollama** - If Ollama server is running (local, free, private)
+4. **Echo Client** - Fallback when no providers are available (for testing)
 
 ## Supported Models
 
@@ -60,6 +79,17 @@ The application tries to initialize LLM clients in this order:
 - `gpt-4o-mini` (default) - Cost-effective for most tasks
 - `gpt-4o` - Most capable GPT-4 optimized model
 - `gpt-4-turbo` - Previous generation flagship model
+
+### Ollama (Local Models)
+
+- `llama3.2` (default) - Meta's latest Llama model, excellent reasoning capabilities
+- `llama3.1` - Previous Llama generation, still very capable
+- `mistral` - Mistral AI's efficient 7B model, good quality/speed balance
+- `phi3` - Microsoft's compact but surprisingly capable model
+- `qwen2.5` - Alibaba's multilingual model, good for multiple languages
+- And 100+ more available at https://ollama.ai/library
+
+**Note:** Ollama provides **complete privacy** (all processing local), **zero costs**, and works **offline**. Quality depends on the model and your hardware (GPU recommended for best performance).
 
 ## Configuration
 
@@ -120,6 +150,62 @@ config set llm_max_tokens 3000
    export OPENAI_API_KEY="sk-..."
    ```
 
+### Setting up Ollama (Local, No API Key Required)
+
+Ollama allows you to run open-source models locally on your computer - completely free, private, and offline-capable.
+
+**Installation:**
+
+1. **Install Ollama** (one-time):
+   - **macOS/Linux:** Visit [ollama.ai](https://ollama.ai) and download installer
+   - **Command line:** `curl -fsSL https://ollama.ai/install.sh | sh`
+
+2. **Pull a model** (one-time per model):
+   ```bash
+   # Recommended: Llama 3.2 (excellent quality, ~2GB)
+   ollama pull llama3.2
+
+   # Alternative: Mistral (fast, ~4GB)
+   ollama pull mistral
+
+   # Lightweight: Phi3 (small, ~2GB)
+   ollama pull phi3
+   ```
+
+3. **Start Ollama server** (each time):
+   ```bash
+   # Start in background
+   ollama serve
+
+   # Or use as systemd service (Linux)
+   systemctl start ollama
+   ```
+
+4. **Verify it's working:**
+   ```bash
+   ollama list  # Shows installed models
+   ```
+
+**Optional Environment Variables:**
+
+```bash
+# Use a different model (default: llama3.2)
+export OLLAMA_MODEL="mistral"
+
+# Use remote Ollama server (default: http://localhost:11434)
+export OLLAMA_HOST="http://remote-server:11434"
+```
+
+**Hardware Requirements:**
+- **Minimum:** 8GB RAM, CPU-only (slow but works)
+- **Recommended:** 16GB RAM, NVIDIA GPU with 6GB+ VRAM (much faster)
+- **Optimal:** 32GB RAM, NVIDIA GPU with 12GB+ VRAM
+
+**Model Size vs Quality:**
+- Small models (2-4GB): Phi3, Llama3.2 - Fast, good for basic analysis
+- Medium models (4-8GB): Mistral, Llama3.1 - Balanced quality/speed
+- Large models (8GB+): Llama3.1 70B, Qwen2.5 - Best quality, requires powerful GPU
+
 ### Persistent Configuration
 
 Add the export statement to your shell profile for permanent configuration:
@@ -130,6 +216,9 @@ echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.bashrc
 
 # For zsh
 echo 'export ANTHROPIC_API_KEY="sk-ant-..."' >> ~/.zshrc
+
+# For Ollama (optional, if not using defaults)
+echo 'export OLLAMA_MODEL="mistral"' >> ~/.bashrc
 ```
 
 ## Usage Examples
@@ -172,11 +261,36 @@ curl -X POST http://localhost:8000/api/agent \
 
 ### "Missing ANTHROPIC_API_KEY" Error
 
-**Solution:** Export your Anthropic API key or switch to OpenAI.
+**Solution:** Export your Anthropic API key, or use OpenAI or Ollama instead.
 
 ### "Missing OPENAI_API_KEY" Error
 
-**Solution:** Export your OpenAI API key or switch to Anthropic.
+**Solution:** Export your OpenAI API key, or use Anthropic or Ollama instead.
+
+### "Cannot connect to Ollama server" Error
+
+**Cause:** Ollama is not running or not accessible.
+
+**Solution:**
+```bash
+# Check if Ollama is running
+ollama list
+
+# If not running, start it
+ollama serve
+
+# If model not found, pull it
+ollama pull llama3.2
+```
+
+### Ollama Responses are Slow
+
+**Cause:** Running on CPU without GPU acceleration.
+
+**Solutions:**
+1. Use a smaller model: `export OLLAMA_MODEL="phi3"`
+2. Ensure GPU drivers are installed (NVIDIA CUDA for best performance)
+3. Reduce max_tokens: `config set llm_max_tokens 1000`
 
 ### Responses are Truncated
 
@@ -188,9 +302,12 @@ config set llm_max_tokens 3000
 
 ### "[Placeholder LLM]" Responses
 
-**Cause:** No API keys are configured.
+**Cause:** No LLM providers are available.
 
-**Solution:** Set either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`.
+**Solutions:**
+1. Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` for cloud providers
+2. Install and run Ollama for free local inference
+3. Check that Ollama is running if you have it installed
 
 ## Cost Considerations
 
@@ -199,15 +316,34 @@ config set llm_max_tokens 3000
 - **Claude 3.5 Sonnet:** $3.00 / 1M input tokens, $15.00 / 1M output tokens
 - **Claude 3.5 Haiku:** $0.25 / 1M input tokens, $1.25 / 1M output tokens
 
+**Typical cost per request:** $0.02-0.05 (Sonnet), $0.005-0.015 (Haiku)
+
 ### OpenAI GPT Pricing (as of 2024)
 
 - **GPT-4o-mini:** $0.15 / 1M input tokens, $0.60 / 1M output tokens
 - **GPT-4o:** $5.00 / 1M input tokens, $15.00 / 1M output tokens
 
-**Typical Usage:**
-- Average prompt: ~500 tokens (system + proposition text)
-- Average response: ~1000-2000 tokens
-- Cost per request: $0.02-0.05 (Claude Sonnet), $0.001-0.002 (GPT-4o-mini)
+**Typical cost per request:** $0.001-0.002 (4o-mini), $0.015-0.05 (4o)
+
+### Ollama (Local) Pricing
+
+- **Cost per request:** $0 (completely free!)
+- **Setup cost:** $0 (open source)
+- **Hardware:** Uses your existing computer (GPU recommended but not required)
+
+**Trade-offs:**
+- ✅ **Advantages:** Free, private, offline-capable, no API limits
+- ⚠️ **Considerations:** Quality varies by model, slower without GPU, uses disk space (~2-8GB per model)
+
+**Typical Usage Comparison:**
+
+| Provider | Prompt | Response | Cost/Request | Quality | Speed |
+|----------|--------|----------|--------------|---------|-------|
+| Claude Sonnet | ~500 tokens | ~1500 tokens | $0.03 | Excellent | Fast |
+| GPT-4o-mini | ~500 tokens | ~1500 tokens | $0.001 | Very Good | Fast |
+| Ollama (Llama3.2) | ~500 tokens | ~1500 tokens | $0 | Good | Medium* |
+
+*Speed depends on hardware (GPU vs CPU)
 
 ### Cost Optimization
 
@@ -227,6 +363,9 @@ client = AnthropicLLMClient(model="claude-3-5-haiku-20241022")
 
 # For OpenAI GPT-4o
 client = OpenAILLMClient(model="gpt-4o")
+
+# For Ollama with Mistral
+client = OllamaLLMClient(model="mistral")
 ```
 
 ### Response Caching
@@ -253,11 +392,15 @@ For issues or questions:
 # Install dependencies
 pip install -r requirements.txt
 
-# Configure Anthropic (recommended)
+# Option 1: Configure Anthropic (best quality)
 export ANTHROPIC_API_KEY="sk-ant-..."
 
-# Or configure OpenAI (alternative)
+# Option 2: Configure OpenAI (good quality, widely available)
 export OPENAI_API_KEY="sk-..."
+
+# Option 3: Configure Ollama (free, local, no API key)
+ollama pull llama3.2
+ollama serve
 
 # Verify configuration
 python trcli.py

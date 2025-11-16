@@ -611,12 +611,14 @@ class TractatusService:
         """Create agent router with LLM backend.
 
         Attempts to initialize LLM clients in the following priority order:
-        1. Anthropic Claude (if ANTHROPIC_API_KEY is set)
-        2. OpenAI GPT (if OPENAI_API_KEY is set)
-        3. Echo client (fallback when no API keys are configured)
+        1. Anthropic Claude (if ANTHROPIC_API_KEY is set) - Best quality
+        2. OpenAI GPT (if OPENAI_API_KEY is set) - Good quality, widely available
+        3. Ollama (if Ollama server is running) - Local, free, no API key
+        4. Echo client (fallback when no providers are available)
 
         The first successfully initialized client is used. This allows users
-        to choose their preferred LLM provider via environment variables.
+        to choose their preferred LLM provider via environment variables or
+        by running Ollama locally.
 
         Args:
             max_tokens: Optional token limit override (uses config default if not provided)
@@ -631,7 +633,7 @@ class TractatusService:
             from tractatus_agents.llm_anthropic import AnthropicLLMClient
             client = AnthropicLLMClient()
         except (ImportError, RuntimeError, Exception):
-            # Anthropic not available, try OpenAI
+            # Anthropic not available, try next provider
             pass
 
         # Fallback to OpenAI if Anthropic not available
@@ -640,7 +642,16 @@ class TractatusService:
                 from tractatus_agents.llm_openai import OpenAILLMClient
                 client = OpenAILLMClient()
             except (ImportError, RuntimeError, Exception):
-                # OpenAI not available, will use Echo client
+                # OpenAI not available, try next provider
+                pass
+
+        # Fallback to Ollama if cloud providers not available
+        if client is None:
+            try:
+                from tractatus_agents.llm_ollama import OllamaLLMClient
+                client = OllamaLLMClient()
+            except (ImportError, RuntimeError, Exception):
+                # Ollama not available, will use Echo client
                 pass
 
         # Get configured max_tokens (defaults to 2000 in config)
