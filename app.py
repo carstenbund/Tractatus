@@ -53,7 +53,9 @@ def get_service() -> TractatusService:
         config = TrcliConfig()
         # Initialize service with session and config
         _service_cache["default"] = TractatusService(session, config)
-    return _service_cache["default"]
+    service = _service_cache["default"]
+    service.sync_preferences()
+    return service
 
 
 # --- Web UI Routes ---
@@ -386,6 +388,7 @@ def api_config_set():
 
         # Persist the preference to ~/.trclirc
         config.set(key, value)
+        service.record_config_update(key)
         return jsonify({"success": True, "data": {"key": key, "value": value}})
     except ValueError as e:
         return jsonify({"success": False, "error": f"Invalid value: {e}"})

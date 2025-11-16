@@ -82,6 +82,7 @@ class TrcliConfig:
         The method is resilient to corruption - errors are logged but don't
         prevent the application from running with default settings.
         """
+
         if self.config_file.exists():
             try:
                 with open(self.config_file, "r") as f:

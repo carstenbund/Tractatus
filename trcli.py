@@ -290,8 +290,10 @@ class TractatusCLI(cmd.Cmd):
                 return
 
             # Set it
-            self.config.set(key, value)
-            print(f"Set {key} = {value}")
+            if self.config.set(key, value):
+                print(f"Set {key} = {value}")
+                if key == "llm_max_tokens":
+                    self._refresh_agent_router()
         except ValueError as e:
             print(f"Error: Invalid value for {key}: {e}")
 
@@ -301,11 +303,13 @@ class TractatusCLI(cmd.Cmd):
 
         if action == "reset":
             self.config.reset()
+            self._refresh_agent_router()
             print("All preferences reset to defaults.")
             return
 
         if action == "reset-all":
             self.config.reset()
+            self._refresh_agent_router()
             print("All preferences reset to defaults.")
             return
 
@@ -315,6 +319,8 @@ class TractatusCLI(cmd.Cmd):
                 key = action[6:].strip()
                 if self.config.reset(key):
                     print(f"Reset {key} to default value.")
+                    if key == "llm_max_tokens":
+                        self._refresh_agent_router()
                 else:
                     print(f"Unknown preference: {key}")
                 return
@@ -605,6 +611,11 @@ class TractatusCLI(cmd.Cmd):
         # Get max_tokens from config
         max_tokens = self.config.get("llm_max_tokens")
         return AgentRouter(LLMAgent(client, max_tokens=max_tokens))
+
+    def _refresh_agent_router(self) -> None:
+        """Rebuild the agent router to pick up new configuration values."""
+
+        self.agent_router = self._configure_agent_router()
 
 
 if __name__ == "__main__":

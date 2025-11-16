@@ -58,20 +58,22 @@ class TractatusService:
         self.current: Proposition | None = None
         # Agent router is lazy-loaded on first use to avoid unnecessary initialization
         self._agent_router: AgentRouter | None = None
+        self._agent_router_tokens: int | None = None
+        self._config_mtime: float | None = self._config_file_mtime()
 
     @property
     def agent_router(self) -> AgentRouter:
-        """Get the agent router, initializing it on first access.
-
-        Lazy initialization avoids setting up LLM clients unless AI features
-        are actually used, improving startup performance and reducing errors
-        when API keys are not configured.
-
-        Returns:
-            AgentRouter configured with LLM backend
-        """
-        if self._agent_router is None:
-            self._agent_router = self._configure_agent_router()
+        """Lazy-load agent router on first access."""
+        self.sync_preferences()
+        current_max_tokens = self.config.get("llm_max_tokens")
+        if (
+            self._agent_router is None
+            or self._agent_router_tokens != current_max_tokens
+        ):
+            self._agent_router = self._configure_agent_router(
+                max_tokens=current_max_tokens
+            )
+            self._agent_router_tokens = current_max_tokens
         return self._agent_router
 
     def get(self, key: str) -> dict | None:
@@ -603,7 +605,9 @@ class TractatusService:
         import re
         return [int(part) if part.isdigit() else part for part in re.split(r"(\d+)", name)]
 
-    def _configure_agent_router(self) -> AgentRouter:
+    def _configure_agent_router(
+        self, max_tokens: int | None = None
+    ) -> AgentRouter:
         """Create agent router with LLM backend."""
         client = None
         try:
@@ -612,5 +616,48 @@ class TractatusService:
         except (ImportError, RuntimeError, Exception):
             pass
 
-        max_tokens = self.config.get("llm_max_tokens")
-        return AgentRouter(LLMAgent(client, max_tokens=max_tokens))
+        tokens = (
+            self.config.get("llm_max_tokens")
+            if max_tokens is None
+            else max_tokens
+        )
+        return AgentRouter(LLMAgent(client, max_tokens=tokens))
+
+    # ------------------------------------------------------------------
+    # Configuration helpers
+    # ------------------------------------------------------------------
+
+    def sync_preferences(self) -> None:
+        """Reload preferences if the config file changed on disk."""
+
+        latest_mtime = self._config_file_mtime()
+        if latest_mtime == self._config_mtime:
+            return
+
+        self.config.load()
+        self._config_mtime = latest_mtime
+        self.invalidate_agent_router_cache()
+
+    def record_config_update(self, key: str | None = None) -> None:
+        """Track an in-process preference change and refresh caches as needed."""
+
+        self._config_mtime = self._config_file_mtime()
+        if key is None or key == "llm_max_tokens":
+            self.invalidate_agent_router_cache()
+
+    def invalidate_agent_router_cache(self) -> None:
+        """Clear the cached agent router so it is rebuilt on next use."""
+
+        self._agent_router = None
+        self._agent_router_tokens = None
+
+    def _config_file_mtime(self) -> float | None:
+        """Return the modification time of the backing config file, if any."""
+
+        config_path = getattr(self.config, "config_file", None)
+        if not config_path:
+            return None
+        try:
+            return config_path.stat().st_mtime
+        except OSError:
+            return None
