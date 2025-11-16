@@ -668,6 +668,11 @@ function analyzeFromCache() {
     // Set the targets in the input field
     agentTargets.value = targets.join(' ');
 
+    // Automatically select "synthesize" for multiple propositions
+    if (agentAction && targets.length > 1) {
+        agentAction.value = 'synthesize';
+    }
+
     // Show cache info
     const typeLabel = lastResultCache.type === 'list' ? 'list' : 'tree';
     if (cacheInfoText && cacheInfo) {

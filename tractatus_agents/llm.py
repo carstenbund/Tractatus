@@ -109,6 +109,18 @@ class LLMAgent:
         )
         return self._ask("Comparison", prompt_pair)
 
+    def synthesize(
+        self,
+        payload: str,
+        language: str | None = None,
+        *,
+        user_input: str | None = None,
+    ) -> LLMResponse:
+        prompt_pair = build_prompt_pair(
+            "synthesize", payload, language=language, user_input=user_input
+        )
+        return self._ask("Synthesize", prompt_pair)
+
     def websearch(
         self,
         payload: str,
