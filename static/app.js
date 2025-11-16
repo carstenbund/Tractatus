@@ -14,6 +14,11 @@ let currentTreeData = [];
 let treeLayoutNodes = [];
 let activePropositionId = null;
 let currentAlternatives = [];
+// Last result cache for AI analysis
+let lastResultCache = {
+    type: null,  // 'list', 'tree', or null
+    propositions: []  // Array of proposition objects
+};
 
 // DOM Elements
 const commandInput = document.getElementById('commandInput');
@@ -35,6 +40,8 @@ const agentTargets = document.getElementById('agentTargets');
 const agentResponse = document.getElementById('agentResponse');
 const agentSpinner = document.getElementById('agentSpinner');
 const agentPrompt = document.getElementById('agentPrompt');
+const cacheInfo = document.getElementById('cacheInfo');
+const cacheInfoText = document.getElementById('cacheInfoText');
 const configList = document.getElementById('configList');
 const messageBox = document.getElementById('messageBox');
 const errorBox = document.getElementById('errorBox');
@@ -640,6 +647,45 @@ function invokeAgent() {
     if (agentPrompt) {
         agentPrompt.value = '';
     }
+    // Clear cache info after analysis is invoked
+    if (cacheInfo) {
+        cacheInfo.classList.add('hidden');
+    }
+}
+
+function analyzeFromCache() {
+    if (!lastResultCache.type || !lastResultCache.propositions.length) {
+        showMessage('No list or tree data to analyze. Please view a list or tree first.');
+        return;
+    }
+
+    // Extract proposition names from the cached data
+    const targets = lastResultCache.propositions.map(p => p.name);
+
+    // Switch to AI Analysis tab
+    switchTab('agent');
+
+    // Set the targets in the input field
+    agentTargets.value = targets.join(' ');
+
+    // Show cache info
+    const typeLabel = lastResultCache.type === 'list' ? 'list' : 'tree';
+    if (cacheInfoText && cacheInfo) {
+        cacheInfoText.textContent = `Loaded ${targets.length} propositions from ${typeLabel} view: ${targets.join(', ')}`;
+        cacheInfo.classList.remove('hidden');
+    }
+
+    // Show a message about what we're analyzing
+    showMessage(`Loaded ${targets.length} propositions from ${typeLabel} view for analysis`);
+}
+
+function clearCacheInfo() {
+    if (cacheInfo) {
+        cacheInfo.classList.add('hidden');
+    }
+    if (agentTargets) {
+        agentTargets.value = '';
+    }
 }
 
 function changeLanguage() {
@@ -748,8 +794,14 @@ function displayProposition(prop) {
 function displayChildren(children) {
     if (!children || children.length === 0) {
         childrenList.innerHTML = '<p>No children</p>';
+        lastResultCache.type = null;
+        lastResultCache.propositions = [];
         return;
     }
+
+    // Cache the list for AI analysis
+    lastResultCache.type = 'list';
+    lastResultCache.propositions = children;
 
     childrenList.innerHTML = children
         .map(
@@ -770,8 +822,14 @@ function displayTree(treeData) {
         }
         hideTreeTooltip();
         renderTreeCanvas();
+        lastResultCache.type = null;
+        lastResultCache.propositions = [];
         return;
     }
+
+    // Cache the tree for AI analysis
+    lastResultCache.type = 'tree';
+    lastResultCache.propositions = currentTreeData;
 
     if (treeEmpty) {
         treeEmpty.classList.add('hidden');

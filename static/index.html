@@ -71,6 +71,9 @@
                 <div id="children-tab" class="tab-content active">
                     <h3>Children</h3>
                     <div id="childrenList" class="list-container"></div>
+                    <button type="button" class="btn btn-secondary" onclick="analyzeFromCache()" style="margin-top: 10px;">
+                        Analyze List
+                    </button>
                 </div>
 
                 <!-- Tree Tab -->
@@ -86,6 +89,9 @@
                         <div id="treeEmpty" class="tree-empty">No tree data</div>
                         <div id="treeTooltip" class="tree-tooltip hidden" role="tooltip"></div>
                     </div>
+                    <button type="button" class="btn btn-secondary" onclick="analyzeFromCache()" style="margin-top: 10px;">
+                        Analyze Tree
+                    </button>
                 </div>
 
                 <!-- Search Tab -->
@@ -107,6 +113,10 @@
                 <!-- AI Analysis Tab -->
                 <div id="agent-tab" class="tab-content">
                     <h3>AI Analysis</h3>
+                    <div id="cacheInfo" class="cache-info hidden" style="margin-bottom: 10px; padding: 8px; background-color: var(--color-bg-alt); border-radius: 4px; font-size: 0.9em;">
+                        <span id="cacheInfoText"></span>
+                        <button type="button" onclick="clearCacheInfo()" style="margin-left: 10px; padding: 2px 8px; background: transparent; border: 1px solid var(--color-text); border-radius: 3px; cursor: pointer;">Clear</button>
+                    </div>
                     <div class="agent-controls">
                         <div class="agent-row">
                             <select id="agentAction">
