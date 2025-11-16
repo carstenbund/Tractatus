@@ -70,6 +70,10 @@ class TractatusService:
             self._agent_router is None
             or self._agent_router_tokens != current_max_tokens
         ):
+            print(
+                "[TractatusService] configuring agent router with "
+                f"max_tokens={current_max_tokens}"
+            )
             self._agent_router = self._configure_agent_router(
                 max_tokens=current_max_tokens
             )
