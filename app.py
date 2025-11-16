@@ -1,4 +1,16 @@
-"""Flask web wrapper for Tractatus CLI."""
+"""Flask web application for navigating Wittgenstein's Tractatus Logico-Philosophicus.
+
+This module provides a RESTful API and web interface for exploring the hierarchical
+structure of the Tractatus, with features including:
+- Hierarchical navigation (parent, children, next, previous)
+- Full-text search across all propositions
+- Multilingual translations and alternative text versions
+- AI-powered analysis using LLM agents
+- User configuration management
+
+The application wraps the core TractatusService in HTTP endpoints and serves
+a single-page application from the static/ folder.
+"""
 from __future__ import annotations
 
 from flask import Flask, jsonify, request, send_from_directory
@@ -9,24 +21,37 @@ from tractatus_config import TrcliConfig
 from tractatus_orm.database import SessionLocal, init_db
 from tractatus_service import TractatusService
 
-# Initialize Flask app
+# Initialize Flask app with static file serving configuration
 app = Flask(__name__, static_folder="static", static_url_path="/static")
+# Enable Cross-Origin Resource Sharing for web client access
 CORS(app)
 
-# Initialize database
+# Initialize database connection and create tables if needed
 init_db()
 
-# Global service instance (one per session)
+# Global service instance cache (maps session IDs to service instances)
+# In production, this should use per-user sessions with proper session management
 _service_cache: dict[str, TractatusService] = {}
 
 
 def get_service() -> TractatusService:
-    """Get or create service instance for current session."""
-    # For simplicity, use a single shared service
-    # In production, you'd want per-user sessions
+    """Get or create a shared TractatusService instance.
+
+    Returns a singleton service instance that maintains navigation state
+    across requests. For multi-user production environments, this should
+    be replaced with per-session instances using Flask session management.
+
+    Returns:
+        TractatusService: Shared service instance with database session and config
+    """
+    # For simplicity, use a single shared service instance
+    # TODO: In production, implement per-user sessions with proper cleanup
     if "default" not in _service_cache:
+        # Create new database session for ORM queries
         session = SessionLocal()
+        # Load user configuration from ~/.trclirc
         config = TrcliConfig()
+        # Initialize service with session and config
         _service_cache["default"] = TractatusService(session, config)
     return _service_cache["default"]
 
@@ -60,16 +85,29 @@ def api_current():
 
 @app.route("/api/get", methods=["POST"])
 def api_get():
-    """Navigate to proposition by name or id."""
+    """Navigate to a specific proposition by name or database ID.
+
+    Accepts proposition names like "1", "1.1", "2.0121" or database IDs like "id:42".
+    Sets this proposition as the current context for subsequent operations.
+
+    Request JSON:
+        key (str): Proposition name (e.g., "1.1") or database ID (e.g., "id:42")
+
+    Returns:
+        JSON response with proposition data or error message
+    """
     data = request.get_json() or {}
     key = data.get("key", "").strip()
 
+    # Validate that a key was provided
     if not key:
         return jsonify({"success": False, "error": "Key required"})
 
     service = get_service()
+    # Retrieve the proposition and set it as current
     result = service.get(key)
 
+    # Return error if proposition not found
     if "error" in result:
         return jsonify({"success": False, "error": result["error"]})
 
@@ -236,13 +274,28 @@ def api_alternatives_create():
 
 @app.route("/api/agent", methods=["POST"])
 def api_agent():
-    """Invoke LLM agent.
+    """Invoke an LLM agent to analyze propositions using AI.
+
+    Supports four types of AI analysis:
+    - comment: Generate commentary on a single proposition
+    - comparison: Compare multiple propositions
+    - websearch: Search web for context (future feature)
+    - reference: Find related propositions (future feature)
+
+    The agent uses OpenAI's GPT models to provide philosophical analysis
+    and insights based on the text content and structure.
 
     Request JSON:
-        action: str - The agent action (comment, comparison, websearch, reference)
-        targets: list[str] - Optional list of proposition names
-        language: str - Optional language code ("de" or "en")
-        user_input: str - Optional user prompt to include with the propositions
+        action (str): The agent action (comment, comparison, websearch, reference)
+        targets (list[str], optional): List of proposition names to analyze
+        language (str, optional): Language code for response ("de", "en", etc.)
+        user_input (str, optional): Additional user prompt to guide the analysis
+
+    Returns:
+        JSON response with AI-generated analysis or error message
+
+    Example:
+        {"action": "comment", "targets": ["1.1"], "language": "en"}
     """
     data = request.get_json() or {}
     action = data.get("action", "").strip()
@@ -250,17 +303,20 @@ def api_agent():
     language = data.get("language", "").strip()
     user_input = data.get("user_input", "").strip()
 
+    # Validate that an action was specified
     if not action:
         return jsonify({"success": False, "error": "Action required"})
 
     service = get_service()
+    # Invoke the LLM agent with the specified action and parameters
     result = service.agent(
         action,
-        targets if targets else None,
-        language=language or None,
-        user_input=user_input or None,
+        targets if targets else None,  # Use current proposition if no targets
+        language=language or None,      # Use config default if not specified
+        user_input=user_input or None,  # Optional user guidance
     )
 
+    # Return error if agent invocation failed
     if "error" in result:
         return jsonify({"success": False, "error": result["error"]})
 
@@ -277,37 +333,58 @@ def api_config_get():
 
 @app.route("/api/config/set", methods=["POST"])
 def api_config_set():
-    """Set configuration preference."""
+    """Update a user configuration preference with type conversion and validation.
+
+    Accepts string values from the web client and converts them to the appropriate
+    type based on the default preference value. Validates the converted value
+    before persisting to ~/.trclirc.
+
+    Request JSON:
+        key (str): Preference name (e.g., "lang", "display_length")
+        value (str): Value as string (will be converted to correct type)
+
+    Returns:
+        JSON response with updated preference or error message
+
+    Example:
+        {"key": "display_length", "value": "500"}
+    """
     data = request.get_json() or {}
     key = data.get("key", "").strip()
     value_str = data.get("value", "")
 
+    # Validate that a key was provided
     if not key:
         return jsonify({"success": False, "error": "Key required"})
 
     service = get_service()
     config = service.config
 
-    # Type conversion
+    # Type conversion based on default value type
     try:
+        # Get the default value to infer the expected type
         default_value = config.DEFAULT_PREFERENCES.get(key)
         if default_value is None:
             return jsonify({"success": False, "error": f"Unknown preference: {key}"})
 
+        # Convert string input to the appropriate type
         expected_type = type(default_value)
         if expected_type == int:
+            # Convert to integer (e.g., display_length, tree_max_depth)
             value = int(value_str)
         elif expected_type == bool:
+            # Convert to boolean (accept multiple formats)
             value = value_str.lower() in ("true", "1", "yes", "on")
         else:
+            # Keep as string (e.g., lang)
             value = value_str
 
-        # Validate
+        # Validate the converted value (checks ranges, valid options, etc.)
         is_valid, error_msg = config.validate_preference(key, value)
         if not is_valid:
             return jsonify({"success": False, "error": error_msg})
 
-        # Set it
+        # Persist the preference to ~/.trclirc
         config.set(key, value)
         return jsonify({"success": True, "data": {"key": key, "value": value}})
     except ValueError as e:
