@@ -59,6 +59,8 @@ class TractatusService:
         # Agent router is lazy-loaded on first use to avoid unnecessary initialization
         self._agent_router: AgentRouter | None = None
         self._agent_router_tokens: int | None = None
+        self._agent_router_provider: str | None = None
+        self._agent_router_model: str | None = None
         self._config_mtime: float | None = self._config_file_mtime()
 
     @property
@@ -66,18 +68,27 @@ class TractatusService:
         """Lazy-load agent router on first access."""
         self.sync_preferences()
         current_max_tokens = self.config.get("llm_max_tokens")
+        current_provider = self.config.get("llm_provider", "auto")
+        current_model = self.config.get("llm_model", "default")
+
+        # Reconfigure router if any LLM settings changed
         if (
             self._agent_router is None
             or self._agent_router_tokens != current_max_tokens
+            or self._agent_router_provider != current_provider
+            or self._agent_router_model != current_model
         ):
             print(
                 "[TractatusService] configuring agent router with "
+                f"provider={current_provider}, model={current_model}, "
                 f"max_tokens={current_max_tokens}"
             )
             self._agent_router = self._configure_agent_router(
                 max_tokens=current_max_tokens
             )
             self._agent_router_tokens = current_max_tokens
+            self._agent_router_provider = current_provider
+            self._agent_router_model = current_model
         return self._agent_router
 
     def get(self, key: str) -> dict | None:
@@ -614,49 +625,74 @@ class TractatusService:
     ) -> AgentRouter:
         """Create agent router with LLM backend.
 
-        Attempts to initialize LLM clients in the following priority order:
+        Respects user configuration for LLM provider and model selection.
+        If llm_provider is "auto", attempts to initialize LLM clients in priority order:
         1. Anthropic Claude (if ANTHROPIC_API_KEY is set) - Best quality
         2. OpenAI GPT (if OPENAI_API_KEY is set) - Good quality, widely available
         3. Ollama (if Ollama server is running) - Local, free, no API key
         4. Echo client (fallback when no providers are available)
 
-        The first successfully initialized client is used. This allows users
-        to choose their preferred LLM provider via environment variables or
-        by running Ollama locally.
+        If a specific provider is configured, only that provider is attempted.
 
         Args:
             max_tokens: Optional token limit override (uses config default if not provided)
 
         Returns:
-            AgentRouter configured with the best available LLM client
+            AgentRouter configured with the requested or best available LLM client
         """
         client = None
+        provider = self.config.get("llm_provider", "auto")
+        model = self.config.get("llm_model", "default")
 
-        # Try Anthropic Claude first (preferred for philosophical analysis)
-        try:
-            from tractatus_agents.llm_anthropic import AnthropicLLMClient
-            client = AnthropicLLMClient()
-        except (ImportError, RuntimeError, Exception):
-            # Anthropic not available, try next provider
-            pass
+        # Use default model for each provider if "default" is specified
+        model_arg = None if model == "default" else model
 
-        # Fallback to OpenAI if Anthropic not available
-        if client is None:
+        # Auto-detect provider (original behavior)
+        if provider == "auto":
+            # Try Anthropic Claude first (preferred for philosophical analysis)
+            try:
+                from tractatus_agents.llm_anthropic import AnthropicLLMClient
+                client = AnthropicLLMClient(model=model_arg) if model_arg else AnthropicLLMClient()
+            except (ImportError, RuntimeError, Exception):
+                pass
+
+            # Fallback to OpenAI if Anthropic not available
+            if client is None:
+                try:
+                    from tractatus_agents.llm_openai import OpenAILLMClient
+                    client = OpenAILLMClient(model=model_arg) if model_arg else OpenAILLMClient()
+                except (ImportError, RuntimeError, Exception):
+                    pass
+
+            # Fallback to Ollama if cloud providers not available
+            if client is None:
+                try:
+                    from tractatus_agents.llm_ollama import OllamaLLMClient
+                    client = OllamaLLMClient(model=model_arg) if model_arg else OllamaLLMClient()
+                except (ImportError, RuntimeError, Exception):
+                    pass
+
+        # Use specific provider from config
+        elif provider == "anthropic":
+            try:
+                from tractatus_agents.llm_anthropic import AnthropicLLMClient
+                client = AnthropicLLMClient(model=model_arg) if model_arg else AnthropicLLMClient()
+            except (ImportError, RuntimeError, Exception) as e:
+                print(f"Warning: Could not initialize Anthropic client: {e}")
+
+        elif provider == "openai":
             try:
                 from tractatus_agents.llm_openai import OpenAILLMClient
-                client = OpenAILLMClient()
-            except (ImportError, RuntimeError, Exception):
-                # OpenAI not available, try next provider
-                pass
+                client = OpenAILLMClient(model=model_arg) if model_arg else OpenAILLMClient()
+            except (ImportError, RuntimeError, Exception) as e:
+                print(f"Warning: Could not initialize OpenAI client: {e}")
 
-        # Fallback to Ollama if cloud providers not available
-        if client is None:
+        elif provider == "ollama":
             try:
                 from tractatus_agents.llm_ollama import OllamaLLMClient
-                client = OllamaLLMClient()
-            except (ImportError, RuntimeError, Exception):
-                # Ollama not available, will use Echo client
-                pass
+                client = OllamaLLMClient(model=model_arg) if model_arg else OllamaLLMClient()
+            except (ImportError, RuntimeError, Exception) as e:
+                print(f"Warning: Could not initialize Ollama client: {e}")
 
         # Get configured max_tokens (defaults to 2000 in config)
         tokens = (
@@ -685,7 +721,7 @@ class TractatusService:
         """Track an in-process preference change and refresh caches as needed."""
 
         self._config_mtime = self._config_file_mtime()
-        if key is None or key == "llm_max_tokens":
+        if key is None or key in ("llm_max_tokens", "llm_provider", "llm_model"):
             self.invalidate_agent_router_cache()
 
     def invalidate_agent_router_cache(self) -> None:
@@ -693,6 +729,8 @@ class TractatusService:
 
         self._agent_router = None
         self._agent_router_tokens = None
+        self._agent_router_provider = None
+        self._agent_router_model = None
 
     def _config_file_mtime(self) -> float | None:
         """Return the modification time of the backing config file, if any."""

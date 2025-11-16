@@ -1287,23 +1287,96 @@ function displayConfig(config) {
     if (config && typeof config.lang === 'string' && config.lang) {
         currentLanguage = config.lang;
     }
+
+    // Define options for dropdown fields
+    const dropdownOptions = {
+        llm_provider: [
+            { value: 'auto', label: 'Auto-detect' },
+            { value: 'anthropic', label: 'Anthropic Claude' },
+            { value: 'openai', label: 'OpenAI GPT' },
+            { value: 'ollama', label: 'Ollama (Local)' }
+        ],
+        llm_model: [] // Will be populated dynamically based on provider
+    };
+
+    // Model options by provider
+    const modelsByProvider = {
+        auto: [
+            { value: 'default', label: 'Default for provider' }
+        ],
+        anthropic: [
+            { value: 'default', label: 'Default (Sonnet 3.5)' },
+            { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+            { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku' },
+            { value: 'claude-3-opus-20240229', label: 'Claude 3 Opus' }
+        ],
+        openai: [
+            { value: 'default', label: 'Default (GPT-4o-mini)' },
+            { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+            { value: 'gpt-4o', label: 'GPT-4o' },
+            { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' }
+        ],
+        ollama: [
+            { value: 'default', label: 'Default (Llama 3.2)' },
+            { value: 'llama3.2', label: 'Llama 3.2' },
+            { value: 'llama3.1', label: 'Llama 3.1' },
+            { value: 'mistral', label: 'Mistral' },
+            { value: 'phi3', label: 'Phi-3 (Microsoft)' },
+            { value: 'qwen2.5', label: 'Qwen 2.5' }
+        ]
+    };
+
+    // Update model options based on current provider
+    const currentProvider = config.llm_provider || 'auto';
+    dropdownOptions.llm_model = modelsByProvider[currentProvider] || modelsByProvider.auto;
+
     configList.innerHTML = Object.entries(config)
-        .map(
-            ([key, value]) =>
-                `<div class="config-item">
-            <div class="config-item-key">${key}</div>
-            <div class="config-item-value">
-                <input
+        .map(([key, value]) => {
+            let inputHtml;
+
+            // Render dropdown for llm_provider
+            if (key === 'llm_provider' && dropdownOptions[key]) {
+                const options = dropdownOptions[key].map(opt =>
+                    `<option value="${opt.value}" ${value === opt.value ? 'selected' : ''}>${opt.label}</option>`
+                ).join('');
+                inputHtml = `<select id="config-input-${key}" onchange="handleProviderChange('${key}')">${options}</select>`;
+            }
+            // Render dropdown for llm_model
+            else if (key === 'llm_model' && dropdownOptions[key]) {
+                const options = dropdownOptions[key].map(opt =>
+                    `<option value="${opt.value}" ${value === opt.value ? 'selected' : ''}>${opt.label}</option>`
+                ).join('');
+                inputHtml = `<select id="config-input-${key}">${options}</select>`;
+            }
+            // Render text input for all other fields
+            else {
+                inputHtml = `<input
                     type="text"
                     id="config-input-${key}"
                     value="${value}"
                     onkeypress="if(event.key==='Enter') setConfigValue('${key}')"
-                />
-                <button onclick="setConfigValue('${key}')">Save</button>
-            </div>
-        </div>`
-        )
+                />`;
+            }
+
+            return `<div class="config-item">
+                <div class="config-item-key">${key}</div>
+                <div class="config-item-value">
+                    ${inputHtml}
+                    <button onclick="setConfigValue('${key}')">Save</button>
+                </div>
+            </div>`;
+        })
         .join('');
+}
+
+function handleProviderChange(key) {
+    // When provider changes, immediately update the model dropdown
+    const providerValue = document.getElementById(`config-input-${key}`).value;
+
+    // Get current config
+    apiConfig().then(() => {
+        // Config will be reloaded and displayed with updated model options
+    });
 }
 
 /**
